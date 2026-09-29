@@ -5,11 +5,12 @@ import { Navbar } from "@/components/Navbar";
 import { BannerCarousel } from "@/components/BannerCarousel";
 import { BookmarkList } from "@/components/BookmarkList";
 import { BookmarkModal } from "@/components/BookmarkModal";
-import { ToastContainer } from "@/components/ToastContainer";
 import { KeyboardCheatSheet } from "@/components/KeyboardCheatSheet";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { MOCK_BANNERS } from "@/data/mockNovels";
+import { LatestUpdatesFeed } from "@/components/LatestUpdatesFeed";
+import { TopFollowedLeaderboard } from "@/components/TopFollowedLeaderboard";
 import { Bookmark, BookmarkFormData } from "@/types/novel";
 
 export default function Home() {
@@ -18,11 +19,8 @@ export default function Home() {
     isLoading,
     addBookmark,
     updateBookmark,
-    incrementChapter,
     deleteBookmark,
     bulkDeleteBookmarks,
-    activeUndo,
-    triggerUndo,
     importData,
     exportData,
   } = useBookmarks();
@@ -32,6 +30,7 @@ export default function Home() {
   const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
+  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -112,8 +111,31 @@ export default function Home() {
           onEditBookmark={handleEditClick}
           onDeleteBookmark={deleteBookmark}
           onBulkDelete={bulkDeleteBookmarks}
-          onQuickAddChapter={incrementChapter}
+          onClearSearch={() => setSearchQuery("")}
         />
+
+        {/* Section 3: Latest Updates & Top Followed Leaderboard */}
+        <section
+          id="section-latest-and-leaderboard"
+          aria-label="นิยายอัปเดตล่าสุดและอันดับยอดนิยม"
+          className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-14"
+        >
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+            {/* Left Column (75% on desktop): Latest Updates Feed (3 novels per row) */}
+            <div className="xl:col-span-9 2xl:col-span-9">
+              <LatestUpdatesFeed
+                selectedAuthor={selectedAuthor}
+                onSelectAuthor={setSelectedAuthor}
+                onClearAuthor={() => setSelectedAuthor(null)}
+              />
+            </div>
+
+            {/* Right Column (25% on desktop): Top Followed Leaderboard */}
+            <div className="xl:col-span-3 2xl:col-span-3 xl:sticky xl:top-20">
+              <TopFollowedLeaderboard onSelectAuthor={setSelectedAuthor} />
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Add / Edit Novel Modal */}
@@ -122,6 +144,7 @@ export default function Home() {
         initialBookmark={editingBookmark}
         onClose={() => setIsAddEditModalOpen(false)}
         onSave={handleSaveBookmark}
+        onDelete={deleteBookmark}
         onExport={exportData}
         onImport={importData}
       />
@@ -134,12 +157,9 @@ export default function Home() {
         onToggleShortcuts={toggleShortcutsEnabled}
       />
 
-      {/* Toast Notification Container with Undo */}
-      <ToastContainer activeUndo={activeUndo} onUndo={triggerUndo} />
-
       {/* Footer */}
       <footer className="w-full py-6 border-t border-gray-200 dark:border-gray-800 text-center text-xs text-gray-400 dark:text-gray-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>Dek-D Interactive Front-end Developer Intern Take-Home Quiz</span>
           <span>Crafted with Next.js 14, TypeScript, Tailwind CSS and Vitest</span>
         </div>

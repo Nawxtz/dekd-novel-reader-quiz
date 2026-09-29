@@ -26,6 +26,7 @@ interface BookmarkModalProps {
   initialBookmark?: Bookmark | null;
   onClose: () => void;
   onSave: (data: BookmarkFormData) => void;
+  onDelete?: (id: string) => void;
   onExport: () => string;
   onImport: (jsonString: string, mode: "replace" | "merge") => { successCount: number; skippedCount: number };
 }
@@ -35,6 +36,7 @@ export function BookmarkModal({
   initialBookmark,
   onClose,
   onSave,
+  onDelete,
   onExport,
   onImport,
 }: BookmarkModalProps) {
@@ -264,7 +266,7 @@ export function BookmarkModal({
                 required
                 value={coverUrl}
                 onChange={(e) => setCoverUrl(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
+                placeholder="https://images.unsplash.com/photo-example"
                 className={`flex-1 px-3.5 py-2 text-sm rounded-xl border bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-dekd-orange/20 transition-all ${
                   formErrors.coverUrl ? "border-red-500" : "border-gray-200 dark:border-gray-700"
                 }`}
@@ -360,20 +362,39 @@ export function BookmarkModal({
           </div>
 
           {/* Modal Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors"
-            >
-              {t.modal.cancel}
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-2 text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover rounded-xl shadow-sm shadow-orange-500/25 active:scale-95 transition-all"
-            >
-              {t.modal.save}
-            </button>
+          <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+            {initialBookmark && onDelete ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm(t.bookmarks.deleteConfirm(initialBookmark.title))) {
+                    onDelete(initialBookmark.id);
+                    onClose();
+                  }
+                }}
+                className="px-3.5 py-2 text-xs sm:text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors"
+              >
+                {t.bookmarks.deleteSingle}
+              </button>
+            ) : (
+              <div />
+            )}
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors"
+              >
+                {t.modal.cancel}
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2 text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover rounded-xl shadow-sm shadow-orange-500/25 active:scale-95 transition-all"
+              >
+                {t.modal.save}
+              </button>
+            </div>
           </div>
         </form>
 

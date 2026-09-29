@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Bookmark,
   CategoryFilter,
@@ -10,9 +10,12 @@ import {
 import { BookmarkCard } from "./BookmarkCard";
 import { SkeletonGrid } from "./SkeletonCard";
 import { BulkDeleteModal } from "./BulkDeleteModal";
+import { SingleDeleteModal } from "./SingleDeleteModal";
 import { sanitizeSearchRegex } from "@/lib/sanitize";
 import { useI18n } from "@/context/I18nContext";
-import { Edit3, Check, Plus, BookOpen, Trash2, CheckSquare, Square } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Edit3, Plus, BookOpen, Trash2, Sparkles } from "lucide-react";
 
 interface BookmarkListProps {
   bookmarks: Bookmark[] | null;
@@ -21,10 +24,10 @@ interface BookmarkListProps {
   isEditMode: boolean;
   onToggleEditMode: () => void;
   onOpenAddModal: () => void;
-  onEditBookmark: (bookmark: Bookmark) => void;
-  onDeleteBookmark: (id: string) => void;
+  onEditBookmark?: (bookmark: Bookmark) => void;
+  onDeleteBookmark?: (id: string) => void;
   onBulkDelete: (ids: string[]) => void;
-  onQuickAddChapter: (id: string) => void;
+  onClearSearch?: () => void;
 }
 
 export function BookmarkList({
@@ -34,17 +37,40 @@ export function BookmarkList({
   isEditMode,
   onToggleEditMode,
   onOpenAddModal,
-  onEditBookmark,
   onDeleteBookmark,
   onBulkDelete,
-  onQuickAddChapter,
+  onClearSearch,
 }: BookmarkListProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("ทั้งหมด");
   const [selectedStatus, setSelectedStatus] = useState<"all" | ReadingStatus>("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [deletingBookmark, setDeletingBookmark] = useState<Bookmark | null>(null);
+
+  const handleRequestSingleDelete = (id: string) => {
+    const target = bookmarks?.find((b) => b.id === id);
+    if (target) {
+      setDeletingBookmark(target);
+    } else if (onDeleteBookmark) {
+      onDeleteBookmark(id);
+    }
+  };
+
+  const handleConfirmSingleDelete = () => {
+    if (deletingBookmark && onDeleteBookmark) {
+      onDeleteBookmark(deletingBookmark.id);
+    }
+    setDeletingBookmark(null);
+  };
+
+  // Clear selections when exiting edit mode
+  useEffect(() => {
+    if (!isEditMode) {
+      setSelectedIds(new Set());
+    }
+  }, [isEditMode]);
 
   // Clear selections when switching category, status, or search query
   const handleCategoryChange = (cat: CategoryFilter) => {
@@ -82,6 +108,34 @@ export function BookmarkList({
     return list;
   }, [bookmarks, selectedCategory, selectedStatus, searchQuery]);
 
+  // Most recently read novel for Quick Resume Bar
+  const latestReadBookmark = useMemo(() => {
+    if (!bookmarks || bookmarks.length === 0) return null;
+    return [...bookmarks].sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    )[0];
+  }, [bookmarks]);
+
+  // Real-time counts for Category Tabs
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { ทั้งหมด: bookmarks?.length || 0 };
+    if (!bookmarks) return counts;
+    for (const b of bookmarks) {
+      counts[b.category] = (counts[b.category] || 0) + 1;
+    }
+    return counts;
+  }, [bookmarks]);
+
+  // Real-time counts for Reading Status Chips
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: bookmarks?.length || 0 };
+    if (!bookmarks) return counts;
+    for (const b of bookmarks) {
+      counts[b.status] = (counts[b.status] || 0) + 1;
+    }
+    return counts;
+  }, [bookmarks]);
+
   // Selection toggle handlers
   const handleToggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -93,28 +147,6 @@ export function BookmarkList({
       }
       return next;
     });
-  };
-
-  const isAllFilteredSelected =
-    filteredBookmarks.length > 0 &&
-    filteredBookmarks.every((b) => selectedIds.has(b.id));
-
-  const handleToggleSelectAll = () => {
-    if (isAllFilteredSelected) {
-      // Deselect filtered
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        filteredBookmarks.forEach((b) => next.delete(b.id));
-        return next;
-      });
-    } else {
-      // Select all filtered
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        filteredBookmarks.forEach((b) => next.add(b.id));
-        return next;
-      });
-    }
   };
 
   const handleConfirmBulkDelete = () => {
@@ -137,11 +169,11 @@ export function BookmarkList({
   return (
     <section
       id="bookmarks-section"
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8"
+      className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-6 sm:pt-8 pb-12 border-t border-gray-200 dark:border-gray-800"
       aria-labelledby="bookmarks-heading"
     >
-      {/* 1. Section Header: Title matching Figma with subtle divider line */}
-      <div className="pb-3 border-b-2 border-gray-200 dark:border-gray-800 mb-4 sm:mb-6">
+      {/* 1. Section Header: Title matching Figma */}
+      <div className="mb-4 sm:mb-5">
         <h1
           id="bookmarks-heading"
           className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight"
@@ -153,9 +185,9 @@ export function BookmarkList({
       {/* 2. Controls Sub-bar: Count on left, Edit & Add on right */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         {/* Dynamic Count */}
-        <div className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">
+        <div className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
           {isLoading ? (
-            <span className="text-gray-400">กำลังโหลดรายการ...</span>
+            <span className="text-gray-400">กำลังโหลดรายการ</span>
           ) : isFiltered ? (
             <span>{t.bookmarks.filteredCount(filteredBookmarks.length, totalCount)}</span>
           ) : (
@@ -165,42 +197,92 @@ export function BookmarkList({
 
         {/* Right Action Buttons */}
         <div className="flex items-center gap-2">
-          {/* Edit Pill Button */}
-          <button
-            type="button"
-            disabled={isLoading || totalCount === 0}
-            onClick={onToggleEditMode}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95 ${
-              isEditMode
-                ? "bg-dekd-orange text-white shadow-sm shadow-orange-500/25"
-                : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
-            }`}
-            aria-pressed={isEditMode}
-          >
-            {isEditMode ? (
-              <>
-                <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>{t.bookmarks.done}</span>
-              </>
-            ) : (
-              <>
+          {isEditMode ? (
+            <>
+              {/* Cancel Button */}
+              <button
+                type="button"
+                onClick={onToggleEditMode}
+                className="inline-flex items-center px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 active:scale-95 transition-all"
+              >
+                {t.editMode.cancel}
+              </button>
+
+              {/* Delete count items Button */}
+              <button
+                type="button"
+                disabled={selectedIds.size === 0}
+                onClick={() => setIsBulkDeleteModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-red-600 hover:border-red-300 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{t.editMode.deleteCount(selectedIds.size)}</span>
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Edit Pill Button matching Figma */}
+              <button
+                type="button"
+                disabled={isLoading || totalCount === 0}
+                onClick={onToggleEditMode}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all active:scale-95 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 border border-gray-300 dark:border-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-pressed={isEditMode}
+              >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span>{t.bookmarks.edit}</span>
-              </>
-            )}
-          </button>
+              </button>
 
-          {/* Add Bookmark Button */}
-          <button
-            type="button"
-            onClick={onOpenAddModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-dekd-orange bg-dekd-orange-light dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/60 border border-orange-200 dark:border-orange-900/60 active:scale-95 transition-all"
-          >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>{t.bookmarks.addBookmark}</span>
-          </button>
+              {/* Add Bookmark Button */}
+              <button
+                type="button"
+                onClick={onOpenAddModal}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover shadow-sm active:scale-95 transition-all"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>{t.bookmarks.addBookmark}</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
+
+      {/* Quick Resume Bar: Most recently read novel */}
+      {!isLoading && !isEditMode && latestReadBookmark && (
+        <div className="mb-6 p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-transparent border border-orange-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative w-12 h-16 sm:w-14 sm:h-20 shrink-0 rounded-lg overflow-hidden shadow-xs bg-gray-200 dark:bg-gray-800">
+              <Image
+                src={latestReadBookmark.coverUrl}
+                alt={latestReadBookmark.title}
+                fill
+                sizes="56px"
+                className="object-cover"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-dekd-orange mb-0.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{locale === "th" ? "อ่านค้างไว้ล่าสุด" : "Continue Reading"}</span>
+              </div>
+              <h2 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate">
+                {latestReadBookmark.title}
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {locale === "th"
+                  ? `ตอนที่ ${latestReadBookmark.currentChapter} จากทั้งหมด ${latestReadBookmark.totalChapters} ตอน`
+                  : `Chapter ${latestReadBookmark.currentChapter} of ${latestReadBookmark.totalChapters}`}
+              </p>
+            </div>
+          </div>
+          <Link
+            href={`/novel/${latestReadBookmark.id}?ch=${latestReadBookmark.currentChapter}`}
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-dekd-orange hover:bg-dekd-orange-hover shadow-xs active:scale-95 transition-all shrink-0"
+          >
+            <span>{locale === "th" ? "อ่านต่อทันที" : "Resume Now"}</span>
+          </Link>
+        </div>
+      )}
 
       {/* 3. Category Filter Tabs & Status Chips */}
       <div className="flex flex-col gap-3 mb-6">
@@ -215,7 +297,7 @@ export function BookmarkList({
                 : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
             }`}
           >
-            {t.categories.all}
+            {t.categories.all} ({categoryCounts["ทั้งหมด"] || 0})
           </button>
           {NOVEL_CATEGORIES.map((cat) => (
             <button
@@ -228,7 +310,7 @@ export function BookmarkList({
                   : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
               }`}
             >
-              {cat}
+              {cat} ({categoryCounts[cat] || 0})
             </button>
           ))}
         </div>
@@ -247,7 +329,7 @@ export function BookmarkList({
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               }`}
             >
-              {t.status[status]}
+              {t.status[status]} ({statusCounts[status] || 0})
             </button>
           ))}
         </div>
@@ -262,26 +344,49 @@ export function BookmarkList({
           <div className="w-14 h-14 rounded-full bg-orange-50 dark:bg-orange-950/40 text-dekd-orange flex items-center justify-center mb-3.5">
             <BookOpen className="w-7 h-7" />
           </div>
-          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">
-            {t.bookmarks.emptyTitle}
-          </h3>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-5 leading-relaxed">
-            {t.bookmarks.emptyDescription}
-          </p>
-          <button
-            type="button"
-            onClick={onOpenAddModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover shadow-sm active:scale-95 transition-all"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>{t.bookmarks.addFirst}</span>
-          </button>
+          {isFiltered ? (
+            <>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">
+                ไม่พบรายการนิยายที่ตรงกับเงื่อนไขการค้นหา
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-5 leading-relaxed">
+                ลองตรวจสอบตัวสะกดคำค้นหา หรือรีเซ็ตตัวกรองหมวดหมู่เพื่อดูรายการทั้งหมด
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategory("ทั้งหมด");
+                  setSelectedStatus("all");
+                  if (onClearSearch) onClearSearch();
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover shadow-sm active:scale-95 transition-all"
+              >
+                <span>ล้างการค้นหาและตัวกรองทั้งหมด</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">
+                {t.bookmarks.emptyTitle}
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-5 leading-relaxed">
+                {t.bookmarks.emptyDescription}
+              </p>
+              <button
+                type="button"
+                onClick={onOpenAddModal}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover shadow-sm active:scale-95 transition-all"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>{t.bookmarks.addFirst}</span>
+              </button>
+            </>
+          )}
         </div>
       ) : (
-        /* 3-Column Responsive Novel Card Grid matching Figma */
         <div
           data-testid="bookmarks-grid"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5"
         >
           {filteredBookmarks.map((bookmark) => (
             <BookmarkCard
@@ -290,47 +395,20 @@ export function BookmarkList({
               isEditMode={isEditMode}
               isSelected={selectedIds.has(bookmark.id)}
               onToggleSelect={handleToggleSelect}
-              onQuickAddChapter={onQuickAddChapter}
-              onEdit={onEditBookmark}
-              onDelete={onDeleteBookmark}
+              onDelete={handleRequestSingleDelete}
             />
           ))}
         </div>
       )}
 
-      {/* 5. Bulk Edit Floating Action Bar */}
-      {isEditMode && totalCount > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-lg p-3 rounded-2xl bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-800 shadow-2xl backdrop-blur-md flex items-center justify-between gap-3 animate-in slide-in-from-bottom-4 duration-300">
-          {/* Select All Toggle */}
-          <button
-            type="button"
-            onClick={handleToggleSelectAll}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-dekd-orange transition-colors"
-          >
-            {isAllFilteredSelected ? (
-              <CheckSquare className="w-4 h-4 text-dekd-orange" />
-            ) : (
-              <Square className="w-4 h-4 text-gray-400" />
-            )}
-            <span>{isAllFilteredSelected ? t.editMode.deselectAll : t.editMode.selectAll}</span>
-          </button>
-
-          {/* Selected Count & Delete Button */}
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-              {t.editMode.selectedCount(selectedIds.size)}
-            </span>
-            <button
-              type="button"
-              disabled={selectedIds.size === 0}
-              onClick={() => setIsBulkDeleteModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs active:scale-95 transition-all"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>{t.editMode.deleteSelected}</span>
-            </button>
-          </div>
-        </div>
+      {/* Single Delete Confirmation Modal */}
+      {deletingBookmark && (
+        <SingleDeleteModal
+          isOpen={!!deletingBookmark}
+          novelTitle={deletingBookmark.title}
+          onClose={() => setDeletingBookmark(null)}
+          onConfirm={handleConfirmSingleDelete}
+        />
       )}
 
       {/* Bulk Delete Modal */}

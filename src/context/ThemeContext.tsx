@@ -24,8 +24,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (stored === "dark" || stored === "light") {
         setThemeState(stored);
       } else {
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        setThemeState(prefersDark ? "dark" : "light");
+        // Default to clean Dek-D light theme matching Figma
+        setThemeState("light");
       }
     } catch {
       // Fallback if localStorage is inaccessible
@@ -106,8 +106,7 @@ export const themeInitScript = `
 (function() {
   try {
     var stored = localStorage.getItem("${THEME_STORAGE_KEY}");
-    var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    if (stored === "dark" || (!stored && prefersDark)) {
+    if (stored === "dark") {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");

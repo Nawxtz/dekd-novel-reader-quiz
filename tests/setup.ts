@@ -1,4 +1,5 @@
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
+import { vi } from "vitest";
 
 // Stub window.matchMedia
 Object.defineProperty(window, "matchMedia", {
@@ -36,7 +37,20 @@ if (typeof HTMLDialogElement !== "undefined") {
   };
   HTMLDialogElement.prototype.close = function () {
     this.removeAttribute("open");
-    this.dispatchEvent(new Event("close"));
   };
 }
+
+// Stub next/navigation
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+  }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+}));
 

@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { normalizeString, isValidHttpsUrl, hasPrototypePollution } from "@/lib/sanitize";
+import {
+  normalizeString,
+  stripHtmlTags,
+  isValidHttpsUrl,
+  hasPrototypePollution,
+} from "@/lib/sanitize";
 
 export const NOVEL_CATEGORIES = [
   "แฟนตาซี",
@@ -28,12 +33,12 @@ export const BookmarkItemSchema = z
       .string()
       .min(1, "กรุณากรอกชื่อเรื่อง")
       .max(200, "ชื่อเรื่องยาวเกิน 200 ตัวอักษร")
-      .transform(normalizeString),
+      .transform((val) => normalizeString(stripHtmlTags(val))),
     author: z
       .string()
       .min(1, "กรุณากรอกชื่อผู้แต่ง")
       .max(100, "ชื่อผู้แต่งยาวเกิน 100 ตัวอักษร")
-      .transform(normalizeString),
+      .transform((val) => normalizeString(stripHtmlTags(val))),
     coverUrl: z
       .string()
       .min(1, "กรุณากรอก URL ภาพหน้าปก")
@@ -58,7 +63,7 @@ export const BookmarkItemSchema = z
       .max(200, "ชื่อตอนยาวเกิน 200 ตัวอักษร")
       .optional()
       .default("")
-      .transform((val) => (val ? normalizeString(val) : "")),
+      .transform((val) => (val ? normalizeString(stripHtmlTags(val)) : "")),
     status: z.enum(READING_STATUSES).default("reading"),
     lastReadAt: z.string().datetime({ message: "รูปแบบเวลา lastReadAt ต้องเป็น ISO UTC" }),
     note: z
@@ -66,7 +71,7 @@ export const BookmarkItemSchema = z
       .max(2000, "บันทึกช่วยจำยาวเกิน 2000 ตัวอักษร")
       .optional()
       .default("")
-      .transform((val) => (val ? normalizeString(val) : "")),
+      .transform((val) => (val ? normalizeString(stripHtmlTags(val)) : "")),
     createdAt: z.string().datetime({ message: "รูปแบบเวลา createdAt ต้องเป็น ISO UTC" }),
     updatedAt: z.string().datetime({ message: "รูปแบบเวลา updatedAt ต้องเป็น ISO UTC" }),
   })
@@ -90,11 +95,13 @@ export const BookmarkFormSchema = z
     title: z
       .string()
       .min(1, "กรุณากรอกชื่อเรื่อง")
-      .max(200, "ชื่อเรื่องยาวเกิน 200 ตัวอักษร"),
+      .max(200, "ชื่อเรื่องยาวเกิน 200 ตัวอักษร")
+      .transform((val) => normalizeString(stripHtmlTags(val))),
     author: z
       .string()
       .min(1, "กรุณากรอกชื่อผู้แต่ง")
-      .max(100, "ชื่อผู้แต่งยาวเกิน 100 ตัวอักษร"),
+      .max(100, "ชื่อผู้แต่งยาวเกิน 100 ตัวอักษร")
+      .transform((val) => normalizeString(stripHtmlTags(val))),
     coverUrl: z
       .string()
       .min(1, "กรุณากรอก URL ภาพหน้าปก")
@@ -112,9 +119,17 @@ export const BookmarkFormSchema = z
       .number({ message: "กรุณาระบุจำนวนตอนทั้งหมดเป็นตัวเลข" })
       .int()
       .positive("จำนวนตอนทั้งหมดต้องมากกว่า 0"),
-    currentChapterTitle: z.string().max(200).optional(),
+    currentChapterTitle: z
+      .string()
+      .max(200)
+      .optional()
+      .transform((val) => (val ? normalizeString(stripHtmlTags(val)) : "")),
     status: z.enum(READING_STATUSES).default("reading"),
-    note: z.string().max(2000).optional(),
+    note: z
+      .string()
+      .max(2000)
+      .optional()
+      .transform((val) => (val ? normalizeString(stripHtmlTags(val)) : "")),
   })
   .superRefine((data, ctx) => {
     if (data.currentChapter > data.totalChapters) {
@@ -126,10 +141,11 @@ export const BookmarkFormSchema = z
     }
   });
 
+export type BookmarkFormDataInput = z.input<typeof BookmarkFormSchema>;
 export type BookmarkFormData = z.infer<typeof BookmarkFormSchema>;
 
 /**
- * Versioned LocalStorage Envelope Schema.
+ * Versioned LocalStorage Envelope Schema with quota cap and optional integrity metadata.
  */
 export const StorageEnvelopeSchema = z.preprocess(
   (val, ctx) => {
@@ -144,7 +160,9 @@ export const StorageEnvelopeSchema = z.preprocess(
   },
   z.object({
     version: z.literal(1),
-    items: z.array(BookmarkItemSchema),
+    items: z.array(BookmarkItemSchema).max(200, "จำนวนรายการนิยายที่คั่นไว้เกินขีดจำกัด (สูงสุด 200 เรื่อง)"),
+    checksum: z.string().optional(),
+    exportedAt: z.string().optional(),
   })
 );
 
@@ -164,3 +182,48 @@ export interface Banner {
   gradient: string;
   novelId?: string;
 }
+
+export type Locale = "th" | "en";
+
+export type PublicationStatus =
+  | { kind: "ongoing" }
+  | { kind: "season_break"; season: number; nextSeasonStart: string | null }
+  | { kind: "hiatus"; since: string; expectedReturn: string | null }
+  | { kind: "completed"; completedAt?: string };
+
+export interface ReleaseSchedule {
+  days: (1 | 2 | 3 | 4 | 5 | 6 | 7)[];
+  time?: string;
+  tz: "Asia/Bangkok";
+}
+
+export interface CatalogNovel {
+  id: string;
+  titleTh: string;
+  titleEn?: string;
+  author: string;
+  artist?: string;
+  coverUrl: string;
+  category: Category | string;
+  genres: string[];
+  originalLocale: Locale;
+  locales: Locale[];
+  status: PublicationStatus;
+  schedule?: ReleaseSchedule;
+  totalChapters: number;
+  latestChapter: {
+    number: number;
+    titleTh: string;
+    titleEn?: string;
+    updatedAt: string;
+  };
+  rating: number; // 0-10
+  followers: {
+    week: number;
+    month: number;
+    all: number;
+  };
+  synopsisTh: string;
+  synopsisEn?: string;
+}
+

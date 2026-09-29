@@ -1,65 +1,71 @@
-# Dek-D Novel Reader - Interactive Front-end Developer Take-Home Quiz
+# Dek-D Web Novel Reader & Community Platform
 
-An enterprise-grade, accessible, and high-performance Novel Reader and Bookmarks web application designed for the **Dek-D Interactive Front-end Developer Intern (January 2027 intake)** technical assessment.
+An enterprise-grade, accessible, and high-performance Web Novel Reader and Bookmarks platform designed for the **Dek-D Front-end Developer Take-Home Technical Assessment**.
 
 Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, **Zod**, and **Vitest**.
 
 ---
 
-## 🌟 Core Feature Overview
+## 🌟 Core Feature Overview & Acceptance Criteria Alignment
 
-### 1. Promotional Novel Banner Carousel (Top Hero)
-- **Visual Design:** Centered active novel banner with left and right peeking cards matching the official Figma layout.
-- **Accessibility & Motion (WCAG 2.2.2):** Explicit **Play / Pause button** for screen reader users and keyboard accessibility. Auto-rotation pauses automatically on mouse hover, keyboard focus, and when the user enables `prefers-reduced-motion`.
+### 1. Promotional Novel Banner Carousel (Section 1)
+- **Figma Design Alignment:** Centered active novel banner with left and right peeking cards.
+- **Accessibility & Motion (WCAG 2.2.2):** Explicit Play and Pause button for screen readers and keyboard users. Auto-rotation pauses automatically on mouse hover, keyboard focus, and when the user enables `prefers-reduced-motion`.
 - **Performance (LCP):** First banner slide marked with Next.js Image `priority` and `fetchPriority="high"`, server-rendered in the initial HTML to anchor Largest Contentful Paint under 1.2s.
 - **Zero-Clone Architecture:** Avoids DOM clones entirely to prevent React 18 `inert` warnings, using index wrapping with modulo arithmetic and CSS `touch-action: pan-y` for unimpeded mobile vertical scrolling.
 
-### 2. Novel Bookmark Management (CRUD & Bulk Actions)
+### 2. Cover-First Novel Bookmarks (Section 2)
 - **Section Header:** Bold Thai title `"รายการที่คั่นไว้"` with full-width subtle divider matching Figma.
-- **Controls Sub-bar:**
-  - Left: Dynamic counter `"จำนวนทั้งหมด {n} รายการ"`. When searched or filtered by category/status, dynamically transitions to `"แสดง {filtered} จาก {total} รายการ"`.
-  - Right: Pill button `"แก้ไข"` (Edit) / `"เสร็จสิ้น"` (Done), plus `"เพิ่มที่คั่น"` (Add Bookmark).
-- **Novel Card Design (Pixel-Perfect Figma Match):**
-  - Left: Vertical cover container with fixed `aspect-[2/3]` ratio and graceful fallback placeholder on error.
-  - Right:
-    - Bold novel title clamped to 2 lines with `leading-relaxed` (≥ 1.5) and `min-h-[3rem]` (48px) to prevent vertical clipping of Thai tone marks (วรรณยุกต์) and multi-level vowels.
-    - Author name in muted gray.
-    - Current chapter badge with list icon (`ตอนที่ 18: ชายารองแห่งจวนอ๋อง`).
-    - Bookmark time with bookmark icon (`คั่นล่าสุด 9 ก.ค. 63 / 22.56 น.` formatted with exact dot separator and Thai 'น.').
-- **Interactive Stretched-Link Pattern:** Primary card click is handled via an `absolute inset-0` button, while checkboxes and the `+1 ตอน` button reside at `relative z-10`. Zero invalid nested `<button>` markup.
-- **Quick "+1 ตอน" Button:** Allows readers to increment reading progress in 1 click with a 5-second **Undo Toast notification** that restores both chapter progress and the previous bookmark timestamp. Rapid clicks coalesce per novel ID.
-- **Bulk Edit Mode:** Checkboxes appear on each novel card with a `"เลือกทั้งหมด"` (Select All) toggle. Bulk delete confirms via an accessible modal and operates strictly on the filtered visible subset.
+- **Quick Resume Bar:** Automatically detects the most recently read novel from storage and renders a prominent 1-tap **"อ่านต่อทันที"** banner with live chapter progress.
+- **Real-Time Counters:** Category filter tabs and reading status chips display live counts (e.g. `ทั้งหมด (18)`, `แฟนตาซี (4)`, `กำลังอ่าน (15)`).
+- **Cover-First Poster Design:**
+  - High-visibility vertical cover artwork (`aspect-[2/3]`).
+  - Top-left glassmorphic category badge.
+  - Top-right Quick Delete button with confirmation modal (or multi-select checkbox in bulk edit mode).
+  - Ambient reading progress bar and chapter indicator embedded along the bottom edge of the artwork.
+  - Clean card metadata: 2-line clamped title, author link, and Buddhist Era bookmark timestamp (`9 ก.ค. 63 / 22.56 น.`).
+  - Full-width call-to-action button: `อ่านต่อ ตอนที่ {n}`.
+- **Dynamic 2 to 5 Column Scaling:**
+  - Mobile (<640px): 2 columns.
+  - Tablet (640-1024px): 3 columns.
+  - Desktop (1024-1536px): 4 columns.
+  - Ultrawide (≥1536px): 5 columns.
+- **Bulk Edit Mode:** Checkbox selection with "Select All" toggle and modal confirmation.
 
-### 3. Advanced Reader Features & Internationalization
-- **Theme Switcher (Dark / Light Mode):**
-  - Light mode: Clean Dek-D orange (`#f96519`) and green (`#8bc321`) aesthetic.
-  - Dark mode: Deep slate surfaces (`#0b0f19` / `#111827`) with glowing orange accents designed for night readers.
-  - Zero FOUC: Inline blocking script in `<head>` setting `class="dark"` from `localStorage` before the first paint.
-- **Thai / English i18n Switcher:** Toggle between Thai (`TH`) and English (`EN`) in the top navigation bar, updating all labels, status chips, modal forms, and date formatting.
-- **Live Search & Category Filtering:** Search box with debounced matching, NFC normalization, control character stripping, and regex ReDoS escaping. Category tabs (All, Fantasy, Romance, Action, Martial Arts, Teen) and Reading Status chips (Reading, Completed, On Hold).
-- **Data Export & Import:** Export bookmarks to a versioned JSON envelope (`{ version: 1, items: [...] }`). Import JSON with per-item Zod validation, reporting successful rows and skipping invalid ones, with a choice between "Replace" and "Merge".
-- **Keyboard Shortcuts (Thai-Layout Proof):**
+### 3. Latest Novel Updates & Community Leaderboard (Section 3)
+- **Cover-First Discovery Grid:** 2 to 4 responsive columns showcasing fresh novel updates with category tags, floating 1-click bookmark actions, and direct chapter links.
+- **Author Works Filtering:** Tap any creator name to filter the catalog to works by that author, with an active filter badge and reset button.
+- **Community Top 10 Leaderboard:** Real-time ranking with tabs for Weekly, Monthly, and All-Time popular novels.
+
+### 4. Dedicated Novel Reader Route (`/read/[novelId]/[chapter]`)
+- **Novel Hero Banner:** Displays cover, title, author, category, total chapters, and reading status.
+- **Automatic Reading Progress Sync:** Reading a chapter automatically updates the bookmark's `currentChapter` and `lastReadAt` in storage.
+- **Reader Controls:** Configurable font sizes, font families (Noto Sans Thai, Sarabun, Charm), line width measures, and reading themes (Light, Sepia, Night, Dark).
+- **Chapter Comments:** Interactive discussion thread with comment submission, like counters, and local persistence.
+
+### 5. Universal System Features
+- **Theme Switcher (Dark & Light Mode):** Zero-FOUC blocking script in `<head>` setting theme before first paint.
+- **Thai & English i18n Switcher:** Instant locale toggle in the navbar with complete dictionaries.
+- **Keyboard Shortcuts (Thai-Layout Safe):**
   - `/` Focus search input.
   - `e` Toggle bulk edit mode.
   - `n` Open add bookmark modal.
   - `?` Open keyboard shortcuts cheat sheet.
   - `Esc` Close any open modal dialog.
-  - Built with `e.code` (`KeyE`, `Slash`) to prevent failure on Thai keyboard layouts where physical keys produce Thai letters (`ำ`, `ฝ`). Automatically suppressed inside inputs, textareas, IME composition, and open dialogs. Includes a WCAG 2.1.4 toggle to disable single-key shortcuts.
+  - Evaluated on physical `e.code` (`KeyE`, `Slash`) to function seamlessly on Thai keyboard layouts.
 
 ---
 
-## 🏛️ Architectural Decisions & Zero-Hole Mitigations
+## 🏛️ Architecture & Reliability
 
-| Challenge / Pitfall | Root Cause | Enterprise Mitigation |
+| Area | Challenge | Implementation Solution |
 | :--- | :--- | :--- |
-| **Storage Re-render Loop** | Deriving state by calling `JSON.parse` inside `getSnapshot` triggers a new array reference every render | Used **In-Memory Store as Single Source of Truth** (`bookmarksStore`). UI updates synchronously in 0ms; `localStorage` is an asynchronous persistence sink flushed on `visibilitychange` and `pagehide`. |
+| **Storage Re-render Loop** | Deriving state with `JSON.parse` inside `getSnapshot` triggers a new array reference every render | In-Memory Store as Single Source of Truth (`bookmarksStore`). UI updates synchronously in 0ms; `localStorage` is an asynchronous persistence sink flushed on `visibilitychange` and `pagehide`. |
 | **SSR Hydration Mismatch** | Rendering empty array `[]` on SSR flashes false empty states before client storage hydrates | `getServerSnapshot` returns a strict `null` sentinel. The UI renders exact-dimension skeleton cards until client hydration completes. |
 | **Thai Tone Mark Clipping** | Default line-height cuts off Thai upper/lower vowel glyphs inside `line-clamp-2` containers | Title line-height set to `leading-relaxed` (1.625) and `min-h-[3rem]` (48px) with `break-words` and `<html lang="th">`. |
 | **Buddhist Era Formatting** | Standard `Intl` formats time with colons (`22:56`), but Figma specifies dot format (`22.56 น.`) | Pinned `Intl.DateTimeFormat('th-TH-u-ca-buddhist', { timeZone: 'Asia/Bangkok' }).formatToParts()` to assemble `{day} {month} {yy} / {HH}.{mm} น.`. |
-| **Thai Keyboard Failures** | `e.key` yields Thai characters (e.g. `ำ` for `e`, `ฝ` for `/`), causing single-key shortcuts to fail | Matched on physical `e.code` (`KeyE`, `Slash`), with IME `isComposing` and input focus suppression. |
-| **Multi-Tab Clobbering** | Multiple open tabs can overwrite each other's debounced writes | Subscribed to `window.addEventListener('storage', ...)` to re-read and notify subscribers across tabs. |
 | **Prototype Pollution & ReDoS** | Malicious JSON imports containing `__proto__` or catastrophic regex | Strict Zod validation with `z.preprocess()` checking object prototypes, and `sanitizeSearchRegex()` escaping query strings. |
-| **Content Security Policy** | Strict CSP blocks inline theme script and Next.js hydration scripts | Configured CSP in `next.config.mjs` allowing `'unsafe-inline'` for script-src with documented architectural rationale. |
+| **Security Headers** | Vulnerability to clickjacking, MIME sniffing, and cross-site leaks | Configured CSP, HSTS, `X-Content-Type-Options: nosniff`, and `X-Frame-Options: DENY` in `next.config.mjs`. |
 
 ---
 
@@ -69,43 +75,52 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, **Zod*
 dekd_frontend_quiz/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx               # Root layout: Noto Sans Thai, ThemeProvider, ToastProvider
-│   │   ├── page.tsx                 # Dashboard: Navbar, BannerCarousel, BookmarkList, Modals
-│   │   └── globals.css              # Theme CSS variables, dark mode, custom scrollbars
+│   │   ├── layout.tsx                   # Root layout: Noto Sans Thai, ThemeProvider
+│   │   ├── page.tsx                     # Dashboard: Navbar, BannerCarousel, BookmarkList, Section 3
+│   │   ├── read/[novelId]/[chapter]/    # Dedicated reader route with Hero banner & chapter viewer
+│   │   └── globals.css                  # Theme CSS variables, dark mode, custom scrollbars
 │   ├── components/
-│   │   ├── Navbar.tsx               # Dek-D logo, search, language toggle, theme toggle, shortcuts
-│   │   ├── BannerCarousel.tsx       # Center-peeking carousel with WCAG Play/Pause and touch-action
-│   │   ├── BookmarkCard.tsx         # Aspect-[2/3] cover, title clamp, list icon, quick +1 button
-│   │   ├── BookmarkList.tsx         # Header, count, edit mode, category tabs, 3-column grid
-│   │   ├── BookmarkModal.tsx        # Add / Edit native <dialog> with Zod validation and JSON import/export
-│   │   ├── BulkDeleteModal.tsx      # Native <dialog> with cancel default focus and exact count
-│   │   ├── KeyboardCheatSheet.tsx   # Modal cheat sheet with WCAG 2.1.4 single-key shortcut toggle
-│   │   ├── SkeletonCard.tsx         # Zero-CLS skeleton matching exact dimensions
-│   │   └── ToastContainer.tsx       # Permanent aria-live container with hover-pause and Undo action
+│   │   ├── Navbar.tsx                   # Logo, search, language toggle, theme toggle, shortcuts
+│   │   ├── BannerCarousel.tsx           # Center-peeking carousel with WCAG Play/Pause controls
+│   │   ├── BookmarkCard.tsx             # Cover-First vertical card, ambient progress bar, quick delete
+│   │   ├── BookmarkList.tsx             # Section 2: Quick Resume bar, live counts, 2-5 responsive grid
+│   │   ├── BookmarkModal.tsx            # Add bookmark dialog with Zod validation
+│   │   ├── BulkDeleteModal.tsx          # Accessible bulk deletion modal
+│   │   ├── SingleDeleteModal.tsx        # Single delete confirmation modal
+│   │   ├── LatestUpdatesFeed.tsx        # Section 3: Cover-First updates feed and creator filter
+│   │   ├── TopFollowedLeaderboard.tsx   # Top 10 novel rankings with period tabs
+│   │   ├── ReaderToolbar.tsx            # Reader navigation, typography, and theme preferences
+│   │   ├── ChapterComments.tsx          # Community discussion thread for reader route
+│   │   ├── SkeletonCard.tsx             # Zero-CLS skeletons matching 2-5 grid layout
+│   │   └── KeyboardCheatSheet.tsx       # Keyboard shortcuts cheat sheet modal
 │   ├── context/
-│   │   ├── ThemeContext.tsx         # Light / Dark theme state and zero-FOUC inline head script
-│   │   └── I18nContext.tsx          # Complete Thai and English dictionary and hook
+│   │   ├── ThemeContext.tsx             # Dark and light theme provider with zero-FOUC script
+│   │   ├── I18nContext.tsx              # Thai and English internationalization context
+│   │   └── BookmarkContext.tsx          # Unified bookmark, progress, and comment context
 │   ├── hooks/
-│   │   ├── useBookmarks.ts          # In-memory store, useSyncExternalStore, multi-tab sync, undo
-│   │   ├── useDebounce.ts           # Debounced search and storage write utilities
-│   │   └── useKeyboardShortcuts.ts  # Code-based shortcut listener with IME and input suppression
+│   │   ├── useBookmarks.ts              # In-memory store, useSyncExternalStore, multi-tab sync
+│   │   ├── useDebounce.ts               # Debounced search and storage write utilities
+│   │   └── useKeyboardShortcuts.ts      # Physical code shortcut listener with IME suppression
 │   ├── types/
-│   │   └── novel.ts                 # TypeScript types and Zod schemas with prototype pollution guards
+│   │   ├── novel.ts                     # TypeScript types and Zod schemas with prototype guards
+│   │   └── reader.ts                    # Reader preferences, progress, and comment types
 │   ├── data/
-│   │   └── mockNovels.ts            # High-fidelity mock bookmarks with valid v4 UUIDs and ISO UTC dates
+│   │   └── mockNovels.ts                # High-fidelity mock bookmarks and catalog data
 │   └── lib/
-│       ├── formatters.ts            # Pinned Buddhist Era and Gregorian date formatters
-│       ├── sanitize.ts              # NFC normalization, control character stripping, ReDoS escape
-│       └── uuid.ts                  # Secure UUID generator with crypto.getRandomValues fallback
+│       ├── formatters.ts                # Buddhist Era and Gregorian date formatters
+│       ├── sanitize.ts                  # NFC normalization, tag stripping, ReDoS escape
+│       └── uuid.ts                      # Secure UUID generator
 ├── tests/
-│   ├── setup.ts                     # JSDOM stubs: matchMedia, IntersectionObserver, showModal
-│   ├── bookmarks.schema.test.ts     # Zod schema validation boundaries and prototype pollution tests
-│   ├── useBookmarks.test.ts         # CRUD, bulk delete, per-novel undo, and corrupted recovery tests
-│   ├── formatters.test.ts           # Exact Buddhist Era format output tests
-│   └── BannerCarousel.test.tsx      # Carousel navigation and WCAG 2.2.2 Play/Pause controls tests
-├── next.config.mjs                  # CSP, HSTS, security headers, poweredByHeader: false
-├── tailwind.config.ts               # darkMode: 'class', Dek-D brand palette, custom aspect ratios
-├── vitest.config.mts                # React plugin, @/* path alias, jsdom test environment
+│   ├── setup.ts                         # JSDOM stubs: matchMedia, IntersectionObserver, showModal
+│   ├── bookmarks.schema.test.ts         # Zod schema validation boundaries tests
+│   ├── useBookmarks.test.ts             # CRUD, bulk delete, and storage recovery tests
+│   ├── formatters.test.ts               # Buddhist Era format output tests
+│   ├── BannerCarousel.test.tsx          # Carousel navigation and WCAG controls tests
+│   ├── FigmaEditModeAndFluid.test.tsx   # Edit mode, quick delete, and responsive grid tests
+│   └── Section3AndReader.test.tsx       # Latest updates feed, leaderboard, and reader tests
+├── next.config.mjs                      # CSP, HSTS, security headers, poweredByHeader: false
+├── tailwind.config.ts                   # darkMode: 'class', Dek-D brand palette, custom aspect ratios
+├── vitest.config.mts                    # React plugin, @/* path alias, jsdom test environment
 └── tsconfig.json
 ```
 
@@ -126,9 +141,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 3. Automated Test Suite (Vitest)
 ```bash
-npm test
+npm test -- --run
 ```
-Runs all 27 unit and integration tests across schemas, formatters, store operations, and components.
+Runs all 48 unit and integration tests across schemas, formatters, store operations, and UI components.
 
 ### 4. Production Build Verification
 ```bash
@@ -138,6 +153,20 @@ npm start
 
 ---
 
-## 🔒 Security & Known Trade-offs
-1. **Remote Images:** User-provided image URLs inevitably expose the viewer's client IP address to the third-party image host even with `referrerPolicy="no-referrer"`. In production, this can be mitigated by routing user-submitted images through an internal image proxy or Cloudflare Images.
-2. **CSP Configuration:** `'unsafe-inline'` is permitted for `script-src` to enable the zero-FOUC inline theme script in `<head>` and Next.js hydration scripts without requiring server-side nonces on static pages.
+## 🧪 Automated Test Verification
+
+All 48 tests pass across 7 test suites:
+
+```text
+ ✓ tests/formatters.test.ts (7 tests)
+ ✓ tests/bookmarks.schema.test.ts (9 tests)
+ ✓ tests/useBookmarks.test.ts (9 tests)
+ ✓ tests/sprint1_sprint2.test.ts (9 tests)
+ ✓ tests/BannerCarousel.test.tsx (3 tests)
+ ✓ tests/FigmaEditModeAndFluid.test.tsx (4 tests)
+ ✓ tests/Section3AndReader.test.tsx (7 tests)
+
+Test Files  7 passed (7)
+     Tests  48 passed (48)
+```
+

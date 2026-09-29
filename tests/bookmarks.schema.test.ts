@@ -61,6 +61,23 @@ describe("BookmarkItemSchema", () => {
       expect(res.data.title).toBe("มังกรผงาดฟ้า");
     }
   });
+
+  it("strips HTML tags from title, author, and note fields to prevent XSS", () => {
+    const withHtml = {
+      ...INITIAL_BOOKMARKS[0],
+      title: "<b>ชื่อนิยาย</b><script>alert('xss')</script>",
+      note: "<img src=x onerror=alert(1)>โน้ตช่วยจำ",
+    };
+    const res = BookmarkItemSchema.safeParse(withHtml);
+    expect(res.success).toBe(true);
+    if (res.success) {
+      expect(res.data.title).toBe("ชื่อนิยายalert('xss')");
+      expect(res.data.note).toBe("โน้ตช่วยจำ");
+      expect(res.data.title).not.toContain("<b>");
+      expect(res.data.title).not.toContain("<script>");
+      expect(res.data.note).not.toContain("<img");
+    }
+  });
 });
 
 describe("StorageEnvelopeSchema", () => {
@@ -80,4 +97,18 @@ describe("StorageEnvelopeSchema", () => {
     const res = StorageEnvelopeSchema.safeParse(payload);
     expect(res.success).toBe(false);
   });
+
+  it("rejects envelopes exceeding the maximum item limit (> 200 items)", () => {
+    const manyItems = Array.from({ length: 201 }, (_, i) => ({
+      ...INITIAL_BOOKMARKS[0],
+      id: `00000000-0000-4000-8000-${i.toString().padStart(12, "0")}`,
+    }));
+    const payload = {
+      version: 1,
+      items: manyItems,
+    };
+    const res = StorageEnvelopeSchema.safeParse(payload);
+    expect(res.success).toBe(false);
+  });
 });
+

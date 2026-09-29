@@ -3,6 +3,7 @@ import { Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider, themeInitScript } from "@/context/ThemeContext";
 import { I18nProvider } from "@/context/I18nContext";
+import { BookmarkProvider } from "@/context/BookmarkContext";
 
 const notoSansThai = Noto_Sans_Thai({
   subsets: ["thai", "latin"],
@@ -40,9 +41,12 @@ export default function RootLayout({
       </head>
       <body className="font-sans min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] antialiased selection:bg-orange-100 selection:text-dekd-orange dark:selection:bg-orange-950 dark:selection:text-orange-300">
         <ThemeProvider>
-          <I18nProvider>{children}</I18nProvider>
+          <I18nProvider>
+            <BookmarkProvider>{children}</BookmarkProvider>
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>
   );
 }
+

@@ -68,35 +68,12 @@ describe("bookmarksStore", () => {
     expect(updated?.currentChapter).toBe(20);
   });
 
-  it("increments chapter by 1 and supports undo restoring both chapter and timestamp", () => {
+  it("updates existing bookmark reading progress and timestamp", () => {
     const target = INITIAL_BOOKMARKS[0];
-    const initialChapter = target.currentChapter;
-    const initialTimestamp = target.lastReadAt;
-
-    const res = bookmarksStore.incrementChapter(target.id);
-    expect(res).not.toBeNull();
-    expect(res?.bookmark.currentChapter).toBe(initialChapter + 1);
-
-    // Apply undo
-    if (res) {
-      const undoSuccess = bookmarksStore.applyUndo(res.undo);
-      expect(undoSuccess).toBe(true);
-
-      const restored = bookmarksStore.getSnapshot()?.find((b) => b.id === target.id);
-      expect(restored?.currentChapter).toBe(initialChapter);
-      expect(restored?.lastReadAt).toBe(initialTimestamp);
-    }
-  });
-
-  it("caps chapter increment at totalChapters", () => {
-    const target = INITIAL_BOOKMARKS[0];
-    // Update to match totalChapters
-    bookmarksStore.updateBookmark(target.id, {
-      currentChapter: target.totalChapters,
+    const updated = bookmarksStore.updateBookmark(target.id, {
+      currentChapter: target.currentChapter + 5,
     });
-
-    const res = bookmarksStore.incrementChapter(target.id);
-    expect(res).toBeNull();
+    expect(updated?.currentChapter).toBe(target.currentChapter + 5);
   });
 
   it("deletes a bookmark by ID", () => {

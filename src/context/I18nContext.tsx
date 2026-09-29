@@ -36,11 +36,14 @@ export interface Translations {
     readNow: string;
     lastBookmarked: string;
     currentChapter: string;
+    deleteSingle: string;
+    deleteConfirm: (title: string) => string;
   };
   editMode: {
     selectAll: string;
     deselectAll: string;
     selectedCount: (n: number) => string;
+    deleteCount: (n: number) => string;
     deleteSelected: string;
     confirmDeleteTitle: string;
     confirmDeleteMessage: (n: number) => string;
@@ -81,6 +84,40 @@ export interface Translations {
     reading: string;
     completed: string;
     on_hold: string;
+    ongoing: string;
+    seasonBreak: string;
+    hiatus: string;
+  };
+  badges: {
+    thOnly: string;
+    enOnly: string;
+    dual: string;
+  };
+  schedule: {
+    updateDaily: string;
+    updateOn: string;
+  };
+  leaderboard: {
+    topFollowed: string;
+    weekly: string;
+    monthly: string;
+    allTime: string;
+    followers: string;
+  };
+  reader: {
+    firstChapter: string;
+    continueReading: string;
+    latestChapter: string;
+    searchChapterPlaceholder: string;
+    fontSize: string;
+    theme: string;
+    day: string;
+    night: string;
+    sepia: string;
+    comments: string;
+    sendComment: string;
+    commentPlaceholder: string;
+    relatedNovels: string;
   };
   toasts: {
     added: string;
@@ -140,11 +177,14 @@ const translations: Record<Locale, Translations> = {
       readNow: "อ่านต่อ",
       lastBookmarked: "คั่นล่าสุด",
       currentChapter: "ตอนที่",
+      deleteSingle: "ลบที่คั่นนี้",
+      deleteConfirm: (title) => `คุณต้องการลบที่คั่น "${title}" หรือไม่?`,
     },
     editMode: {
       selectAll: "เลือกทั้งหมด",
       deselectAll: "ยกเลิกการเลือก",
       selectedCount: (n) => `เลือกไว้ ${n} รายการ`,
+      deleteCount: (n) => `${n} รายการ`,
       deleteSelected: "ลบรายการที่เลือก",
       confirmDeleteTitle: "ยืนยันการลบรายการที่คั่นไว้",
       confirmDeleteMessage: (n) => `คุณต้องการลบ ${n} รายการที่เลือกใช่หรือไม่ ข้อมูลจะหายไปทันที`,
@@ -183,15 +223,50 @@ const translations: Record<Locale, Translations> = {
     status: {
       all: "ทุกสถานะ",
       reading: "กำลังอ่าน",
-      completed: "อ่านจบแล้ว",
+      completed: "จบบริบูรณ์",
       on_hold: "ดองไว้",
+      ongoing: "กำลังเผยแพร่",
+      seasonBreak: "จบซีซัน",
+      hiatus: "พักการเขียน",
+    },
+    badges: {
+      thOnly: "ไทยเท่านั้น",
+      enOnly: "อังกฤษเท่านั้น",
+      dual: "2 ภาษา",
+    },
+    schedule: {
+      updateDaily: "อัปเดตทุกวัน",
+      updateOn: "อัปเดตทุกวัน",
+    },
+    leaderboard: {
+      topFollowed: "มังงะ/นิยายที่คนติดตามมากที่สุด",
+      weekly: "รายสัปดาห์",
+      monthly: "รายเดือน",
+      allTime: "ตลอดกาล",
+      followers: "ติดตาม",
+    },
+    reader: {
+      firstChapter: "ตอนแรก",
+      continueReading: "อ่านต่อ",
+      latestChapter: "ตอนใหม่",
+      searchChapterPlaceholder: "ค้นหาเลขตอน เช่น 25 หรือ 108",
+      fontSize: "ขนาดอักษร",
+      theme: "ธีม",
+      day: "สว่าง",
+      night: "มืด",
+      sepia: "ถนอมสายตา",
+      comments: "ความคิดเห็น",
+      sendComment: "ส่งความคิดเห็น",
+      commentPlaceholder: "เขียนความคิดเห็นของคุณ",
+      relatedNovels: "นิยายที่เกี่ยวข้อง",
     },
     toasts: {
       added: "เพิ่มรายการที่คั่นเรียบร้อยแล้ว",
       updated: "บันทึกการแก้ไขเรียบร้อยแล้ว",
       deleted: "ลบรายการที่คั่นเรียบร้อยแล้ว",
       bulkDeleted: (n) => `ลบรายการที่เลือกแล้ว ${n} รายการ`,
-      chapterIncremented: (title, ch) => `อัปเดต ${title} เป็นตอนที่ ${ch}`,
+      chapterIncremented: (title, ch) =>
+        title ? `อัปเดต "${title}" เป็นตอนที่ ${ch}` : `อัปเดตเป็นตอนที่ ${ch}`,
       undo: "เลิกทำ",
       undoSuccess: "ย้อนกลับการเปลี่ยนแปลงเรียบร้อยแล้ว",
       importSuccess: (count, skipped) =>
@@ -245,11 +320,14 @@ const translations: Record<Locale, Translations> = {
       readNow: "Continue Reading",
       lastBookmarked: "Bookmarked",
       currentChapter: "Chapter",
+      deleteSingle: "Delete bookmark",
+      deleteConfirm: (title) => `Are you sure you want to delete "${title}"?`,
     },
     editMode: {
       selectAll: "Select All",
       deselectAll: "Deselect All",
       selectedCount: (n) => `${n} selected`,
+      deleteCount: (n) => `${n} items`,
       deleteSelected: "Delete Selected",
       confirmDeleteTitle: "Confirm Bulk Deletion",
       confirmDeleteMessage: (n) => `Are you sure you want to delete ${n} selected novels? This action cannot be undone.`,
@@ -290,13 +368,48 @@ const translations: Record<Locale, Translations> = {
       reading: "Reading",
       completed: "Completed",
       on_hold: "On Hold",
+      ongoing: "Ongoing",
+      seasonBreak: "Season End",
+      hiatus: "Hiatus",
+    },
+    badges: {
+      thOnly: "TH Only",
+      enOnly: "ENG Only",
+      dual: "TH / EN",
+    },
+    schedule: {
+      updateDaily: "Updates Daily",
+      updateOn: "Updates on",
+    },
+    leaderboard: {
+      topFollowed: "Most Followed Novels",
+      weekly: "Weekly",
+      monthly: "Monthly",
+      allTime: "All",
+      followers: "Followers",
+    },
+    reader: {
+      firstChapter: "First Chapter",
+      continueReading: "Continue Reading",
+      latestChapter: "Latest Chapter",
+      searchChapterPlaceholder: "Search chapter, e.g. 25 or 108",
+      fontSize: "Font Size",
+      theme: "Theme",
+      day: "Day",
+      night: "Night",
+      sepia: "Sepia",
+      comments: "Comments",
+      sendComment: "Post Comment",
+      commentPlaceholder: "Write your comment",
+      relatedNovels: "Related Novels",
     },
     toasts: {
       added: "Novel bookmark added successfully",
       updated: "Changes saved successfully",
       deleted: "Bookmark deleted successfully",
       bulkDeleted: (n) => `Deleted ${n} selected bookmarks`,
-      chapterIncremented: (title, ch) => `Updated ${title} to Chapter ${ch}`,
+      chapterIncremented: (title, ch) =>
+        title ? `Updated "${title}" to Chapter ${ch}` : `Updated to Chapter ${ch}`,
       undo: "Undo",
       undoSuccess: "Change reverted successfully",
       importSuccess: (count, skipped) =>

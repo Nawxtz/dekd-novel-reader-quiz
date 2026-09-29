@@ -1,24 +1,19 @@
 "use client";
 
-import { useSyncExternalStore, useCallback, useRef, useState } from "react";
+import { useSyncExternalStore, useCallback } from "react";
 import {
   Bookmark,
   BookmarkFormData,
+  BookmarkFormDataInput,
   BookmarkItemSchema,
   StorageEnvelopeSchema,
 } from "@/types/novel";
 import { INITIAL_BOOKMARKS } from "@/data/mockNovels";
 import { generateUUID } from "@/lib/uuid";
-import { normalizeString } from "@/lib/sanitize";
+import { normalizeString, computeChecksum, hasPrototypePollution } from "@/lib/sanitize";
 
-export const STORAGE_KEY = "dekd_bookmarks_v1";
+export const STORAGE_KEY = "dekd_bookmarks_v2";
 export const BACKUP_KEY = "dekd_novels_backup";
-
-export interface UndoRecord {
-  novelId: string;
-  previousChapter: number;
-  previousLastReadAt: string;
-}
 
 class BookmarksStore {
   private state: Bookmark[] | null = null;
@@ -137,11 +132,19 @@ class BookmarksStore {
   private persistImmediate(items: Bookmark[]) {
     if (!this.storageAvailable || typeof window === "undefined") return;
     try {
+      const cappedItems = items.slice(0, 200);
+      const itemsJson = JSON.stringify(cappedItems);
       const envelope = {
         version: 1,
-        items,
+        items: cappedItems,
+        checksum: computeChecksum(itemsJson),
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(envelope));
+      try {
+        localStorage.setItem("dekd_bookmarks_v1", JSON.stringify(envelope));
+      } catch {
+        // Fallback
+      }
     } catch {
       this.storageAvailable = false;
     }
@@ -170,13 +173,13 @@ class BookmarksStore {
     }
   }
 
-  // --- Store Mutations ---
+  // Store mutations
 
-  public addBookmark(formData: BookmarkFormData): Bookmark {
+  public addBookmark(formData: BookmarkFormDataInput | BookmarkFormData, explicitNovelId?: string): Bookmark {
     const nowIso = new Date().toISOString();
     const newBookmark: Bookmark = {
       id: generateUUID(),
-      novelId: `novel-${Date.now()}`,
+      novelId: explicitNovelId || `novel-${Date.now()}`,
       title: normalizeString(formData.title),
       author: normalizeString(formData.author),
       coverUrl: formData.coverUrl.trim(),
@@ -186,7 +189,7 @@ class BookmarksStore {
       currentChapterTitle: formData.currentChapterTitle
         ? normalizeString(formData.currentChapterTitle)
         : `ตอนที่ ${formData.currentChapter}`,
-      status: formData.status,
+      status: formData.status || "reading",
       lastReadAt: nowIso,
       note: formData.note ? normalizeString(formData.note) : "",
       createdAt: nowIso,
@@ -238,61 +241,6 @@ class BookmarksStore {
     return updatedBookmark;
   }
 
-  public incrementChapter(id: string): { bookmark: Bookmark; undo: UndoRecord } | null {
-    if (!this.state) return null;
-    const nowIso = new Date().toISOString();
-    let undoRecord: UndoRecord | null = null;
-    let targetBookmark: Bookmark | null = null;
-
-    this.state = this.state.map((item) => {
-      if (item.id !== id) return item;
-      if (item.currentChapter >= item.totalChapters) return item; // Already at max
-
-      undoRecord = {
-        novelId: item.id,
-        previousChapter: item.currentChapter,
-        previousLastReadAt: item.lastReadAt,
-      };
-
-      targetBookmark = {
-        ...item,
-        currentChapter: item.currentChapter + 1,
-        lastReadAt: nowIso,
-        updatedAt: nowIso,
-      };
-      return targetBookmark;
-    });
-
-    if (targetBookmark && undoRecord) {
-      this.notify();
-      this.scheduleDebouncedWrite();
-      return { bookmark: targetBookmark, undo: undoRecord };
-    }
-    return null;
-  }
-
-  public applyUndo(undoRecord: UndoRecord): boolean {
-    if (!this.state) return false;
-    let found = false;
-
-    this.state = this.state.map((item) => {
-      if (item.id !== undoRecord.novelId) return item;
-      found = true;
-      return {
-        ...item,
-        currentChapter: undoRecord.previousChapter,
-        lastReadAt: undoRecord.previousLastReadAt,
-        updatedAt: new Date().toISOString(),
-      };
-    });
-
-    if (found) {
-      this.notify();
-      this.scheduleDebouncedWrite();
-    }
-    return found;
-  }
-
   public deleteBookmark(id: string): boolean {
     if (!this.state) return false;
     const initialLen = this.state.length;
@@ -325,6 +273,9 @@ class BookmarksStore {
     let rawItems: unknown[] = [];
     try {
       const parsed = JSON.parse(jsonString);
+      if (hasPrototypePollution(parsed)) {
+        throw new Error("Malicious prototype pollution payload detected");
+      }
       if (Array.isArray(parsed)) {
         rawItems = parsed;
       } else if (parsed && typeof parsed === "object" && Array.isArray((parsed as { items?: unknown[] }).items)) {
@@ -332,12 +283,13 @@ class BookmarksStore {
       } else {
         throw new Error("Invalid structure");
       }
-    } catch {
-      throw new Error("Invalid JSON");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Invalid JSON";
+      throw new Error(message);
     }
 
-    // Limit import size to 1,000 items
-    const limitedItems = rawItems.slice(0, 1000);
+    // Limit import size to 200 items to prevent storage exhaustion attacks
+    const limitedItems = rawItems.slice(0, 200);
     const validItems: Bookmark[] = [];
     let skippedCount = 0;
 
@@ -361,7 +313,7 @@ class BookmarksStore {
     if (mode === "replace") {
       this.state = validItems;
     } else {
-      this.state = [...validItems, ...(this.state || [])];
+      this.state = [...validItems, ...(this.state || [])].slice(0, 200);
     }
 
     this.notify();
@@ -370,9 +322,13 @@ class BookmarksStore {
   }
 
   public exportData(): string {
+    const items = (this.state || []).slice(0, 200);
+    const itemsJson = JSON.stringify(items);
     const envelope = {
       version: 1,
-      items: this.state || [],
+      items,
+      checksum: computeChecksum(itemsJson),
+      exportedAt: new Date().toISOString(),
     };
     return JSON.stringify(envelope, null, 2);
   }
@@ -391,9 +347,6 @@ export function useBookmarks() {
     bookmarksStore.getServerSnapshot
   );
 
-  const [activeUndo, setActiveUndo] = useState<UndoRecord | null>(null);
-  const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const addBookmark = useCallback((formData: BookmarkFormData) => {
     return bookmarksStore.addBookmark(formData);
   }, []);
@@ -402,56 +355,13 @@ export function useBookmarks() {
     return bookmarksStore.updateBookmark(id, updates);
   }, []);
 
-  const incrementChapter = useCallback((id: string) => {
-    const result = bookmarksStore.incrementChapter(id);
-    if (result) {
-      if (undoTimeoutRef.current) {
-        clearTimeout(undoTimeoutRef.current);
-      }
-      setActiveUndo(result.undo);
-      undoTimeoutRef.current = setTimeout(() => {
-        setActiveUndo(null);
-        undoTimeoutRef.current = null;
-      }, 5000);
-    }
-    return result?.bookmark || null;
+  const deleteBookmark = useCallback((id: string) => {
+    return bookmarksStore.deleteBookmark(id);
   }, []);
 
-  const triggerUndo = useCallback(() => {
-    if (activeUndo) {
-      const success = bookmarksStore.applyUndo(activeUndo);
-      if (undoTimeoutRef.current) {
-        clearTimeout(undoTimeoutRef.current);
-        undoTimeoutRef.current = null;
-      }
-      setActiveUndo(null);
-      return success;
-    }
-    return false;
-  }, [activeUndo]);
-
-  const deleteBookmark = useCallback((id: string) => {
-    // If deleted novel has active undo, clear undo
-    if (activeUndo && activeUndo.novelId === id) {
-      if (undoTimeoutRef.current) {
-        clearTimeout(undoTimeoutRef.current);
-        undoTimeoutRef.current = null;
-      }
-      setActiveUndo(null);
-    }
-    return bookmarksStore.deleteBookmark(id);
-  }, [activeUndo]);
-
   const bulkDeleteBookmarks = useCallback((ids: string[]) => {
-    if (activeUndo && ids.includes(activeUndo.novelId)) {
-      if (undoTimeoutRef.current) {
-        clearTimeout(undoTimeoutRef.current);
-        undoTimeoutRef.current = null;
-      }
-      setActiveUndo(null);
-    }
     return bookmarksStore.bulkDeleteBookmarks(ids);
-  }, [activeUndo]);
+  }, []);
 
   const importData = useCallback((jsonString: string, mode: "replace" | "merge" = "replace") => {
     return bookmarksStore.importData(jsonString, mode);
@@ -466,11 +376,8 @@ export function useBookmarks() {
     isLoading: bookmarks === null,
     addBookmark,
     updateBookmark,
-    incrementChapter,
     deleteBookmark,
     bulkDeleteBookmarks,
-    activeUndo,
-    triggerUndo,
     importData,
     exportData,
   };

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import React from "react";
 import { BannerCarousel } from "../src/components/BannerCarousel";
 import { MOCK_BANNERS } from "../src/data/mockNovels";
