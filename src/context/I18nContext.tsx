@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 
 export type Locale = "th" | "en";
 
@@ -346,7 +346,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const setLocale = (nextLocale: Locale) => {
+  const setLocale = useCallback((nextLocale: Locale) => {
     setLocaleState(nextLocale);
     try {
       localStorage.setItem(I18N_STORAGE_KEY, nextLocale);
@@ -357,11 +357,22 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     if (typeof document !== "undefined") {
       document.documentElement.lang = nextLocale;
     }
-  };
+  }, []);
 
-  const toggleLocale = () => {
-    setLocale(locale === "th" ? "en" : "th");
-  };
+  const toggleLocale = useCallback(() => {
+    setLocaleState((prev) => {
+      const next = prev === "th" ? "en" : "th";
+      try {
+        localStorage.setItem(I18N_STORAGE_KEY, next);
+      } catch {
+        // Ignore
+      }
+      if (typeof document !== "undefined") {
+        document.documentElement.lang = next;
+      }
+      return next;
+    });
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -370,7 +381,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       toggleLocale,
       t: translations[locale],
     }),
-    [locale]
+    [locale, setLocale, toggleLocale]
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

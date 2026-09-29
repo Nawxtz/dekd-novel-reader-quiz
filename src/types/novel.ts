@@ -41,7 +41,7 @@ export const BookmarkItemSchema = z
         message: "URL รูปภาพต้องขึ้นต้นด้วย https:// หรือเป็นพาธภายใน",
       }),
     category: z.enum(NOVEL_CATEGORIES, {
-      errorMap: () => ({ message: "หมวดหมู่นิยายไม่ถูกต้อง" }),
+      message: "หมวดหมู่นิยายไม่ถูกต้อง",
     }),
     currentChapter: z
       .number()
@@ -102,14 +102,14 @@ export const BookmarkFormSchema = z
         message: "URL รูปภาพต้องขึ้นต้นด้วย https:// หรือเป็นพาธภายใน",
       }),
     category: z.enum(NOVEL_CATEGORIES, {
-      errorMap: () => ({ message: "กรุณาเลือกหมวดหมู่นิยาย" }),
+      message: "กรุณาเลือกหมวดหมู่นิยาย",
     }),
     currentChapter: z
-      .number({ invalid_type_error: "กรุณาระบุตอนเป็นตัวเลข" })
+      .number({ message: "กรุณาระบุตอนเป็นตัวเลข" })
       .int()
       .nonnegative("จำนวนตอนต้องไม่ติดลบ"),
     totalChapters: z
-      .number({ invalid_type_error: "กรุณาระบุจำนวนตอนทั้งหมดเป็นตัวเลข" })
+      .number({ message: "กรุณาระบุจำนวนตอนทั้งหมดเป็นตัวเลข" })
       .int()
       .positive("จำนวนตอนทั้งหมดต้องมากกว่า 0"),
     currentChapterTitle: z.string().max(200).optional(),
