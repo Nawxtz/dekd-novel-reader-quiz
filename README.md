@@ -1,51 +1,93 @@
-# Dek-D Web Novel Reader & Community Platform
+# Dek-D Web Novel Reader and Community Platform
 
-An enterprise-grade, accessible, and high-performance Web Novel Reader and Bookmarks platform designed for the **Dek-D Front-end Developer Take-Home Technical Assessment**.
+An accessible, responsive, and high-performance Web Novel Reader and Bookmarks platform built for the Dek-D Front-end Developer Take-Home Technical Assessment.
 
-Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, **Zod**, and **Vitest**.
+Built with Next.js 14 (App Router), TypeScript, Tailwind CSS, Zod, and Vitest.
 
 ---
 
-## 🌟 Core Feature Overview & Acceptance Criteria Alignment
+## Table of Contents
 
-### 1. Promotional Novel Banner Carousel (Section 1)
+- [Overview](#overview)
+- [Acceptance Criteria Alignment](#acceptance-criteria-alignment)
+- [Key Features](#key-features)
+  - [Section 1: Promotional Novel Banner Carousel](#section-1-promotional-novel-banner-carousel)
+  - [Section 2: Cover-First Novel Bookmarks](#section-2-cover-first-novel-bookmarks)
+  - [Section 3: Latest Updates and Community Leaderboard](#section-3-latest-updates-and-community-leaderboard)
+  - [Section 4: Dedicated Novel Reader Route](#section-4-dedicated-novel-reader-route)
+  - [Platform-Wide Capabilities](#platform-wide-capabilities)
+- [Architecture and Reliability](#architecture-and-reliability)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Automated Test Verification](#automated-test-verification)
+- [Security and Compliance](#security-and-compliance)
+
+---
+
+## Overview
+
+This project implements a web novel platform designed around user needs: visual-first novel discovery, clear reading continuity, and zero cognitive friction. The architecture leverages modern React patterns with synchronous in-memory state management, resilient offline-first persistence, and fluid responsive design.
+
+---
+
+## Acceptance Criteria Alignment
+
+| Requirement | Implementation Detail | Status |
+| :--- | :--- | :--- |
+| 1. Create, Edit, and Delete Bookmarks | Full CRUD with modal dialogs, bulk edit mode, quick delete confirmation, and automatic chapter progress sync. | Complete |
+| 2. Promotional Novel Banners | Center-focused carousel with left and right peeking cards, auto-play, touch swipe, and WCAG 2.2.2 play/pause controls. | Complete |
+| 3. Web Responsive Design | Fluid layout scaling from 2 to 5 columns on bookmarks and 2 to 4 columns on latest updates across all viewports. | Complete |
+| 4. Modern Framework Stack | Built on Next.js 14 App Router, React 18, TypeScript, and Tailwind CSS. | Complete |
+
+---
+
+## Key Features
+
+### Section 1: Promotional Novel Banner Carousel
+
 - **Figma Design Alignment:** Centered active novel banner with left and right peeking cards.
-- **Accessibility & Motion (WCAG 2.2.2):** Explicit Play and Pause button for screen readers and keyboard users. Auto-rotation pauses automatically on mouse hover, keyboard focus, and when the user enables `prefers-reduced-motion`.
-- **Performance (LCP):** First banner slide marked with Next.js Image `priority` and `fetchPriority="high"`, server-rendered in the initial HTML to anchor Largest Contentful Paint under 1.2s.
-- **Zero-Clone Architecture:** Avoids DOM clones entirely to prevent React 18 `inert` warnings, using index wrapping with modulo arithmetic and CSS `touch-action: pan-y` for unimpeded mobile vertical scrolling.
+- **Accessibility and Motion (WCAG 2.2.2):** Dedicated Play and Pause button for screen readers and keyboard users. Auto-rotation pauses on mouse hover, keyboard focus, and when the user enables `prefers-reduced-motion`.
+- **LCP Optimization:** First banner slide marked with Next.js Image `priority` and `fetchPriority="high"`, server-rendered in initial HTML to anchor Largest Contentful Paint under 1.2s.
+- **Zero-Clone Architecture:** Avoids DOM clones entirely to prevent React 18 `inert` warnings, using index wrapping with modulo arithmetic and CSS `touch-action: pan-y` for smooth mobile scrolling.
 
-### 2. Cover-First Novel Bookmarks (Section 2)
-- **Section Header:** Bold Thai title `"รายการที่คั่นไว้"` with full-width subtle divider matching Figma.
-- **Quick Resume Bar:** Automatically detects the most recently read novel from storage and renders a prominent 1-tap **"อ่านต่อทันที"** banner with live chapter progress.
-- **Real-Time Counters:** Category filter tabs and reading status chips display live counts (e.g. `ทั้งหมด (18)`, `แฟนตาซี (4)`, `กำลังอ่าน (15)`).
+### Section 2: Cover-First Novel Bookmarks
+
+- **Header and Controls:** Bold Thai title "รายการที่คั่นไว้" with full-width subtle divider, dynamic count indicator, and Edit mode toggle.
+- **Quick Resume Bar:** Automatically detects the most recently read novel from storage and renders a prominent 1-tap "อ่านต่อทันที" banner with live chapter progress.
+- **Real-Time Counters:** Category filter tabs and reading status chips display live counts (for example, "ทั้งหมด (18)", "แฟนตาซี (4)", "กำลังอ่าน (15)").
 - **Cover-First Poster Design:**
   - High-visibility vertical cover artwork (`aspect-[2/3]`).
   - Top-left glassmorphic category badge.
   - Top-right Quick Delete button with confirmation modal (or multi-select checkbox in bulk edit mode).
   - Ambient reading progress bar and chapter indicator embedded along the bottom edge of the artwork.
-  - Clean card metadata: 2-line clamped title, author link, and Buddhist Era bookmark timestamp (`9 ก.ค. 63 / 22.56 น.`).
-  - Full-width call-to-action button: `อ่านต่อ ตอนที่ {n}`.
+  - Clean card metadata: 2-line clamped title, author link, and Buddhist Era bookmark timestamp.
+  - Full-width call-to-action button: "อ่านต่อ ตอนที่ {n}".
 - **Dynamic 2 to 5 Column Scaling:**
   - Mobile (<640px): 2 columns.
   - Tablet (640-1024px): 3 columns.
   - Desktop (1024-1536px): 4 columns.
   - Ultrawide (≥1536px): 5 columns.
-- **Bulk Edit Mode:** Checkbox selection with "Select All" toggle and modal confirmation.
+- **Bulk Edit Mode:** Multi-selection checkboxes with "Select All" toggle and modal confirmation.
 
-### 3. Latest Novel Updates & Community Leaderboard (Section 3)
-- **Cover-First Discovery Grid:** 2 to 4 responsive columns showcasing fresh novel updates with category tags, floating 1-click bookmark actions, and direct chapter links.
+### Section 3: Latest Updates and Community Leaderboard
+
+- **Cover-First Discovery Grid:** Responsive 2 to 4 column feed showcasing fresh novel chapters with category tags, 1-click bookmark actions, and direct chapter links.
 - **Author Works Filtering:** Tap any creator name to filter the catalog to works by that author, with an active filter badge and reset button.
 - **Community Top 10 Leaderboard:** Real-time ranking with tabs for Weekly, Monthly, and All-Time popular novels.
 
-### 4. Dedicated Novel Reader Route (`/read/[novelId]/[chapter]`)
+### Section 4: Dedicated Novel Reader Route
+
+Path: `/read/[novelId]/[chapter]`
+
 - **Novel Hero Banner:** Displays cover, title, author, category, total chapters, and reading status.
 - **Automatic Reading Progress Sync:** Reading a chapter automatically updates the bookmark's `currentChapter` and `lastReadAt` in storage.
 - **Reader Controls:** Configurable font sizes, font families (Noto Sans Thai, Sarabun, Charm), line width measures, and reading themes (Light, Sepia, Night, Dark).
 - **Chapter Comments:** Interactive discussion thread with comment submission, like counters, and local persistence.
 
-### 5. Universal System Features
-- **Theme Switcher (Dark & Light Mode):** Zero-FOUC blocking script in `<head>` setting theme before first paint.
-- **Thai & English i18n Switcher:** Instant locale toggle in the navbar with complete dictionaries.
+### Platform-Wide Capabilities
+
+- **Theme Switcher:** Dark and Light mode toggle with zero-FOUC blocking script in `<head>`.
+- **Thai and English Internationalization:** Instant locale toggle in the navbar with complete dictionaries.
 - **Keyboard Shortcuts (Thai-Layout Safe):**
   - `/` Focus search input.
   - `e` Toggle bulk edit mode.
@@ -56,20 +98,20 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, **Zod*
 
 ---
 
-## 🏛️ Architecture & Reliability
+## Architecture and Reliability
 
 | Area | Challenge | Implementation Solution |
 | :--- | :--- | :--- |
 | **Storage Re-render Loop** | Deriving state with `JSON.parse` inside `getSnapshot` triggers a new array reference every render | In-Memory Store as Single Source of Truth (`bookmarksStore`). UI updates synchronously in 0ms; `localStorage` is an asynchronous persistence sink flushed on `visibilitychange` and `pagehide`. |
 | **SSR Hydration Mismatch** | Rendering empty array `[]` on SSR flashes false empty states before client storage hydrates | `getServerSnapshot` returns a strict `null` sentinel. The UI renders exact-dimension skeleton cards until client hydration completes. |
-| **Thai Tone Mark Clipping** | Default line-height cuts off Thai upper/lower vowel glyphs inside `line-clamp-2` containers | Title line-height set to `leading-relaxed` (1.625) and `min-h-[3rem]` (48px) with `break-words` and `<html lang="th">`. |
+| **Thai Tone Mark Clipping** | Default line-height cuts off Thai upper and lower vowel glyphs inside `line-clamp-2` containers | Title line-height set to `leading-relaxed` (1.625) and `min-h-[3rem]` (48px) with `break-words` and `<html lang="th">`. |
 | **Buddhist Era Formatting** | Standard `Intl` formats time with colons (`22:56`), but Figma specifies dot format (`22.56 น.`) | Pinned `Intl.DateTimeFormat('th-TH-u-ca-buddhist', { timeZone: 'Asia/Bangkok' }).formatToParts()` to assemble `{day} {month} {yy} / {HH}.{mm} น.`. |
-| **Prototype Pollution & ReDoS** | Malicious JSON imports containing `__proto__` or catastrophic regex | Strict Zod validation with `z.preprocess()` checking object prototypes, and `sanitizeSearchRegex()` escaping query strings. |
+| **Prototype Pollution and ReDoS** | Malicious JSON imports containing `__proto__` or catastrophic regex | Strict Zod validation with `z.preprocess()` checking object prototypes, and `sanitizeSearchRegex()` escaping query strings. |
 | **Security Headers** | Vulnerability to clickjacking, MIME sniffing, and cross-site leaks | Configured CSP, HSTS, `X-Content-Type-Options: nosniff`, and `X-Frame-Options: DENY` in `next.config.mjs`. |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 dekd_frontend_quiz/
@@ -77,7 +119,7 @@ dekd_frontend_quiz/
 │   ├── app/
 │   │   ├── layout.tsx                   # Root layout: Noto Sans Thai, ThemeProvider
 │   │   ├── page.tsx                     # Dashboard: Navbar, BannerCarousel, BookmarkList, Section 3
-│   │   ├── read/[novelId]/[chapter]/    # Dedicated reader route with Hero banner & chapter viewer
+│   │   ├── read/[novelId]/[chapter]/    # Dedicated reader route with Hero banner and chapter viewer
 │   │   └── globals.css                  # Theme CSS variables, dark mode, custom scrollbars
 │   ├── components/
 │   │   ├── Navbar.tsx                   # Logo, search, language toggle, theme toggle, shortcuts
@@ -126,26 +168,32 @@ dekd_frontend_quiz/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Installation
+
 ```bash
 npm install
 ```
 
 ### 2. Development Server
+
 ```bash
 npm run dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### 3. Automated Test Suite (Vitest)
+### 3. Automated Test Suite
+
 ```bash
 npm test -- --run
 ```
+
 Runs all 48 unit and integration tests across schemas, formatters, store operations, and UI components.
 
 ### 4. Production Build Verification
+
 ```bash
 npm run build
 npm start
@@ -153,20 +201,29 @@ npm start
 
 ---
 
-## 🧪 Automated Test Verification
+## Automated Test Verification
 
 All 48 tests pass across 7 test suites:
 
 ```text
- ✓ tests/formatters.test.ts (7 tests)
- ✓ tests/bookmarks.schema.test.ts (9 tests)
- ✓ tests/useBookmarks.test.ts (9 tests)
- ✓ tests/sprint1_sprint2.test.ts (9 tests)
- ✓ tests/BannerCarousel.test.tsx (3 tests)
- ✓ tests/FigmaEditModeAndFluid.test.tsx (4 tests)
- ✓ tests/Section3AndReader.test.tsx (7 tests)
+ PASS  tests/formatters.test.ts (7 tests)
+ PASS  tests/bookmarks.schema.test.ts (9 tests)
+ PASS  tests/useBookmarks.test.ts (9 tests)
+ PASS  tests/sprint1_sprint2.test.ts (9 tests)
+ PASS  tests/BannerCarousel.test.tsx (3 tests)
+ PASS  tests/FigmaEditModeAndFluid.test.tsx (4 tests)
+ PASS  tests/Section3AndReader.test.tsx (7 tests)
 
-Test Files  7 passed (7)
-     Tests  48 passed (48)
+Test Files: 7 passed, 7 total
+Tests:      48 passed, 48 total
 ```
+
+---
+
+## Security and Compliance
+
+- **Input Sanitization:** User-submitted title, author, and note fields are processed through NFC normalization and HTML tag stripping. Search queries are escaped against ReDoS vulnerabilities.
+- **Storage Boundaries:** JSON imports and LocalStorage envelopes are strictly validated against Zod schemas. Prototype pollution attempts using `__proto__`, `constructor`, or `prototype` keys are rejected.
+- **Security Headers:** HTTP headers configured in `next.config.mjs` enforce `Content-Security-Policy`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Strict-Transport-Security`.
+
 
