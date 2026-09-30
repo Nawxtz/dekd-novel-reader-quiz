@@ -4,6 +4,9 @@ An accessible, responsive, and high-performance Web Novel Reader and Bookmarks p
 
 Built with Next.js 14 (App Router), TypeScript, Tailwind CSS, Zod, and Vitest.
 
+- Live Demo: https://dekdfrontendquiz-seven.vercel.app
+- Repository: https://github.com/Nawxtz/dekd-novel-reader-quiz
+
 ---
 
 ## Table of Contents
