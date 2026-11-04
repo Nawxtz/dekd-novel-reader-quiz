@@ -6,7 +6,7 @@ import { ReadingProgress, ReaderPreferences, CommentItem, DEFAULT_READER_PREFERE
 import { bookmarksStore } from "@/hooks/useBookmarks";
 import { INITIAL_COMMENTS } from "@/data/mockNovels";
 import { generateUUID } from "@/lib/uuid";
-import { normalizeString } from "@/lib/sanitize";
+import { normalizeString, hasPrototypePollution } from "@/lib/sanitize";
 
 export const BOOKMARKS_STORAGE_KEY_V1 = "dekd_bookmarks_v1";
 export const READING_PROGRESS_STORAGE_KEY = "dekd_reading_progress_v1";
@@ -30,8 +30,11 @@ class ReadingProgressStore {
   private handleStorageEvent = (event: StorageEvent) => {
     if (event.key !== READING_PROGRESS_STORAGE_KEY || !event.newValue) return;
     try {
-      this.state = JSON.parse(event.newValue);
-      this.notify();
+      const parsed = JSON.parse(event.newValue);
+      if (parsed && typeof parsed === "object" && !hasPrototypePollution(parsed)) {
+        this.state = parsed;
+        this.notify();
+      }
     } catch {
       // Ignore parse errors from background tabs
     }
@@ -44,7 +47,12 @@ class ReadingProgressStore {
     try {
       const stored = localStorage.getItem(READING_PROGRESS_STORAGE_KEY);
       if (stored) {
-        this.state = JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === "object" && !hasPrototypePollution(parsed)) {
+          this.state = parsed;
+        } else {
+          this.state = {};
+        }
       }
     } catch {
       this.state = {};
@@ -126,7 +134,7 @@ class ReaderPrefsStore {
     if (event.key !== READER_PREFS_STORAGE_KEY || !event.newValue) return;
     try {
       const parsed = JSON.parse(event.newValue);
-      if (parsed && typeof parsed === "object") {
+      if (parsed && typeof parsed === "object" && !hasPrototypePollution(parsed)) {
         this.state = { ...DEFAULT_READER_PREFERENCES, ...parsed };
         this.notify();
       }
@@ -143,15 +151,19 @@ class ReaderPrefsStore {
       const stored = localStorage.getItem(READER_PREFS_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        this.state = {
-          theme: parsed.theme || DEFAULT_READER_PREFERENCES.theme,
-          fontSizeStep:
-            typeof parsed.fontSizeStep === "number"
-              ? Math.max(0, Math.min(5, parsed.fontSizeStep))
-              : DEFAULT_READER_PREFERENCES.fontSizeStep,
-          fontFamily: parsed.fontFamily || DEFAULT_READER_PREFERENCES.fontFamily,
-          measure: parsed.measure || DEFAULT_READER_PREFERENCES.measure,
-        };
+        if (parsed && typeof parsed === "object" && !hasPrototypePollution(parsed)) {
+          this.state = {
+            theme: parsed.theme || DEFAULT_READER_PREFERENCES.theme,
+            fontSizeStep:
+              typeof parsed.fontSizeStep === "number"
+                ? Math.max(0, Math.min(5, parsed.fontSizeStep))
+                : DEFAULT_READER_PREFERENCES.fontSizeStep,
+            fontFamily: parsed.fontFamily || DEFAULT_READER_PREFERENCES.fontFamily,
+            measure: parsed.measure || DEFAULT_READER_PREFERENCES.measure,
+          };
+        } else {
+          this.state = DEFAULT_READER_PREFERENCES;
+        }
       }
     } catch {
       this.state = DEFAULT_READER_PREFERENCES;
@@ -223,7 +235,7 @@ class ChapterCommentsStore {
     if (event.key !== CHAPTER_COMMENTS_STORAGE_KEY || !event.newValue) return;
     try {
       const parsed = JSON.parse(event.newValue);
-      if (Array.isArray(parsed)) {
+      if (Array.isArray(parsed) && !hasPrototypePollution(parsed)) {
         this.state = parsed;
         this.notify();
       }
@@ -243,7 +255,10 @@ class ChapterCommentsStore {
         this.persist();
       } else {
         const parsed = JSON.parse(stored);
-        this.state = Array.isArray(parsed) ? parsed : INITIAL_COMMENTS;
+        this.state =
+          Array.isArray(parsed) && !hasPrototypePollution(parsed)
+            ? parsed
+            : INITIAL_COMMENTS;
       }
     } catch {
       this.state = INITIAL_COMMENTS;
@@ -340,7 +355,7 @@ export interface BookmarkContextType {
   bookmarks: Bookmark[] | null;
   isLoading: boolean;
   isBookmarked: (novelId: string) => boolean;
-  toggleBookmarkFromCatalog: (novel: CatalogNovel) => boolean;
+  toggleBookmarkFromCatalog: (novel: CatalogNovel, activeChapter?: number) => boolean;
   addBookmark: (formData: BookmarkFormData, explicitNovelId?: string) => Bookmark;
   updateBookmark: (id: string, updates: Partial<BookmarkFormData>) => Bookmark | null;
   deleteBookmark: (id: string) => boolean;
@@ -408,8 +423,13 @@ export function BookmarkProvider({ children }: { children: React.ReactNode }) {
   );
 
   const toggleBookmarkFromCatalog = useCallback(
-    (novel: CatalogNovel): boolean => {
-      const existing = bookmarks?.find((b) => b.novelId === novel.id || b.id === novel.id);
+    (novel: CatalogNovel, activeChapter?: number): boolean => {
+      const existing = bookmarks?.find(
+        (b) =>
+          b.novelId === novel.id ||
+          b.id === novel.id ||
+          b.title.trim().toLowerCase() === novel.titleTh.trim().toLowerCase()
+      );
       if (existing) {
         bookmarksStore.deleteBookmark(existing.id);
         return false;
@@ -421,15 +441,21 @@ export function BookmarkProvider({ children }: { children: React.ReactNode }) {
         ? (novel.category as Category)
         : "แฟนตาซี";
 
+      const chapterNum = activeChapter && activeChapter > 0 ? activeChapter : 1;
+      const chapterTitle =
+        activeChapter && activeChapter > 0
+          ? `ตอนที่ ${activeChapter}`
+          : (novel.latestChapter?.titleTh || "ตอนที่ 1");
+
       bookmarksStore.addBookmark(
         {
           title: novel.titleTh,
           author: novel.author,
           coverUrl: novel.coverUrl,
           category: validCategory,
-          currentChapter: 1,
-          totalChapters: novel.totalChapters,
-          currentChapterTitle: novel.latestChapter?.titleTh || "ตอนที่ 1",
+          currentChapter: chapterNum,
+          totalChapters: novel.totalChapters || 50,
+          currentChapterTitle: chapterTitle,
           status: "reading",
           note: "",
         },

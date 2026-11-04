@@ -10,6 +10,14 @@
   --text-secondary: #4b5563;
   --text-muted: #6b7280;
   --border-color: #e5e7eb;
+
+  /* Modern visual depth tokens for light theme */
+  --hairline-border: rgba(0, 0, 0, 0.08);
+  --hairline-border-subtle: rgba(0, 0, 0, 0.05);
+  --specular-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.65);
+  --surface-elevation-low: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --surface-elevation-mid: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --surface-elevation-high: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
 }
 
 .dark {
@@ -20,6 +28,14 @@
   --text-secondary: #d1d5db;
   --text-muted: #9ca3af;
   --border-color: #374151;
+
+  /* Modern visual depth tokens for dark theme */
+  --hairline-border: rgba(255, 255, 255, 0.10);
+  --hairline-border-subtle: rgba(255, 255, 255, 0.06);
+  --specular-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  --surface-elevation-low: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+  --surface-elevation-mid: 0 4px 6px -1px rgba(0, 0, 0, 0.45), 0 2px 4px -2px rgba(0, 0, 0, 0.35);
+  --surface-elevation-high: 0 10px 15px -3px rgba(0, 0, 0, 0.55), 0 4px 6px -4px rgba(0, 0, 0, 0.40);
 }
 
 body {
@@ -67,5 +83,24 @@ dialog::backdrop {
   .touch-pan-y {
     touch-action: pan-y;
   }
-}
 
+  .border-hairline {
+    border-color: var(--hairline-border);
+  }
+
+  .specular-top {
+    box-shadow: var(--specular-highlight);
+  }
+
+  .elevation-low {
+    box-shadow: var(--surface-elevation-low);
+  }
+
+  .elevation-mid {
+    box-shadow: var(--surface-elevation-mid);
+  }
+
+  .elevation-high {
+    box-shadow: var(--surface-elevation-high);
+  }
+}

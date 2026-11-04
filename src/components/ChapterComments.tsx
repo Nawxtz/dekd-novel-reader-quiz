@@ -165,8 +165,8 @@ export function ChapterComments({
             className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all resize-none"
             placeholder={
               isEn
-                ? "Share your thoughts about this chapter..."
-                : "ร่วมแสดงความคิดเห็นเกี่ยวกับตอนนี้..."
+                ? "Share your thoughts about this chapter"
+                : "ร่วมแสดงความคิดเห็นเกี่ยวกับตอนนี้"
             }
           />
           <div className="absolute right-3 bottom-3 text-[11px] font-mono text-slate-400 pointer-events-none">

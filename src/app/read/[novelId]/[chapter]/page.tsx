@@ -31,6 +31,7 @@ interface ReaderPageProps {
 export default function ReaderPage({ params }: ReaderPageProps) {
   const router = useRouter();
   const { novelId, chapter: chapterParam } = params;
+  const isValidNovelId = Boolean(novelId && /^[a-zA-Z0-9_-]+$/.test(novelId));
   const currentChapterNum = Math.max(1, parseInt(chapterParam, 10) || 1);
 
   const {
@@ -44,6 +45,12 @@ export default function ReaderPage({ params }: ReaderPageProps) {
 
   const { locale } = useI18n();
   const isEn = locale === "en";
+
+  useEffect(() => {
+    if (!isValidNovelId) {
+      router.replace("/");
+    }
+  }, [isValidNovelId, router]);
 
   // Local state for reader settings with fallback to context
   const [theme, setTheme] = useState<ThemeMode>(readerPrefs?.theme || "day");
@@ -187,6 +194,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
 
   // Record reading progress in LocalStorage
   useEffect(() => {
+    if (!isValidNovelId) return;
     saveReadingProgress(
       {
         novelId,
@@ -196,7 +204,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
       },
       chapterData.titleTh
     );
-  }, [novelId, currentChapterNum, chapterData, saveReadingProgress]);
+  }, [isValidNovelId, novelId, currentChapterNum, chapterData, saveReadingProgress]);
 
   // Handlers for reader settings
   const handleThemeChange = useCallback(
@@ -256,6 +264,29 @@ export default function ReaderPage({ params }: ReaderPageProps) {
 
   const currentFontSizePx = FONT_SIZE_STEPS[fontSizeIndex] ?? 20;
 
+  if (!isValidNovelId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            {isEn ? "Invalid Novel Identifier" : "รหัสนิยายไม่ถูกต้อง"}
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            {isEn
+              ? "The requested novel ID contains unsafe characters."
+              : "รหัสนิยายที่ระบุมีอักขระที่ไม่ปลอดภัย"}
+          </p>
+          <Link
+            href="/"
+            className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover transition-colors"
+          >
+            {isEn ? "Back to Home" : "กลับสู่หน้าหลัก"}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       data-testid="novel-reader-page"
@@ -278,7 +309,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
         onContentLocaleChange={setContentLocale}
         hasBilingual={hasBilingual}
         isBookmarked={isSaved}
-        onToggleBookmark={() => toggleBookmarkFromCatalog(novel)}
+        onToggleBookmark={() => toggleBookmarkFromCatalog(novel, currentChapterNum)}
       />
 
       {/* Main Reader Wrapper */}
@@ -368,7 +399,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
 
                   <button
                     type="button"
-                    onClick={() => toggleBookmarkFromCatalog(novel)}
+                    onClick={() => toggleBookmarkFromCatalog(novel, currentChapterNum)}
                     className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-orange-400 hover:text-dekd-orange transition-all"
                     title={isSaved ? (isEn ? "Remove from bookmarks" : "ยกเลิกคั่นนิยาย") : (isEn ? "Bookmark this novel" : "คั่นนิยายเรื่องนี้")}
                   >
@@ -582,7 +613,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
           <div className="mt-12 pt-8 border-t border-black/10 dark:border-white/10 text-center">
             <span className="text-xs tracking-wider opacity-60 uppercase font-semibold">
               {isEn
-                ? `— End of Chapter ${currentChapterNum} —`
+                ? `Chapter ${currentChapterNum} Complete`
                 : `จบบริบูรณ์ ตอนที่ ${currentChapterNum}`}
             </span>
           </div>

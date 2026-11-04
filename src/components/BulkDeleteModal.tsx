@@ -19,12 +19,14 @@ export function BulkDeleteModal({
 }: BulkDeleteModalProps) {
   const { t } = useI18n();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
     if (isOpen) {
+      triggerRef.current = document.activeElement as HTMLElement | null;
       if (!dialog.open) {
         dialog.showModal();
       }
@@ -32,8 +34,15 @@ export function BulkDeleteModal({
       if (dialog.open) {
         dialog.close();
       }
+      triggerRef.current?.focus();
     }
   }, [isOpen]);
+
+  const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    if (e.target === dialogRef.current) {
+      onClose();
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -41,11 +50,12 @@ export function BulkDeleteModal({
     <dialog
       ref={dialogRef}
       onClose={onClose}
+      onClick={handleDialogClick}
       aria-labelledby="bulk-delete-title"
       aria-describedby="bulk-delete-description"
-      className="m-auto p-0 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl max-w-md w-full focus:outline-none"
+      className="m-auto p-0 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl max-w-md w-full focus:outline-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
     >
-      <div className="p-6">
+      <div className="p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3.5 mb-4">
           <div className="w-11 h-11 rounded-full bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
             <AlertTriangle className="w-6 h-6" />
@@ -75,7 +85,7 @@ export function BulkDeleteModal({
             type="button"
             autoFocus
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
           >
             {t.editMode.cancel}
           </button>
@@ -85,7 +95,7 @@ export function BulkDeleteModal({
               onConfirm();
               onClose();
             }}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 shadow-sm active:scale-95 transition-all"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 shadow-sm active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-600"
           >
             <Trash2 className="w-4 h-4" />
             <span>{t.editMode.confirm}</span>

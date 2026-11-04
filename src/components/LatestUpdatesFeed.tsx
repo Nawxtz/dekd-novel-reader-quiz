@@ -4,9 +4,9 @@ import React, { useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, BookOpen, Check, BookmarkPlus, X, ChevronRight } from "lucide-react";
-import { useBookmarks } from "@/hooks/useBookmarks";
+import { useBookmarkContext } from "@/context/BookmarkContext";
 import { useI18n } from "@/context/I18nContext";
-import { CatalogNovel, Category, NOVEL_CATEGORIES } from "@/types/novel";
+import { CatalogNovel } from "@/types/novel";
 import { CATALOG_NOVELS } from "@/data/mockNovels";
 
 interface LatestUpdatesFeedProps {
@@ -24,7 +24,7 @@ export function LatestUpdatesFeed({
   onSelectAuthor,
   className = "",
 }: LatestUpdatesFeedProps) {
-  const { bookmarks, addBookmark, deleteBookmark } = useBookmarks();
+  const { bookmarks, toggleBookmarkFromCatalog } = useBookmarkContext();
   const { locale } = useI18n();
   const isEn = locale === "en";
 
@@ -52,31 +52,9 @@ export function LatestUpdatesFeed({
 
   const handleToggleBookmark = useCallback(
     (novel: CatalogNovel) => {
-      const existingBookmarkId =
-        bookmarkedMap.get(novel.id) ||
-        bookmarkedMap.get(novel.titleTh.trim().toLowerCase());
-
-      if (existingBookmarkId) {
-        deleteBookmark(existingBookmarkId);
-      } else {
-        const validCategory: Category = NOVEL_CATEGORIES.includes(novel.category as Category)
-          ? (novel.category as Category)
-          : "แฟนตาซี";
-
-        addBookmark({
-          title: novel.titleTh,
-          author: novel.author,
-          coverUrl: novel.coverUrl,
-          category: validCategory,
-          currentChapter: 1,
-          totalChapters: novel.totalChapters || 50,
-          currentChapterTitle: novel.latestChapter?.titleTh || "",
-          status: "reading",
-          note: "",
-        });
-      }
+      toggleBookmarkFromCatalog(novel);
     },
-    [bookmarkedMap, addBookmark, deleteBookmark]
+    [toggleBookmarkFromCatalog]
   );
 
   return (
@@ -157,7 +135,7 @@ export function LatestUpdatesFeed({
                 className="group relative flex flex-col justify-between bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
               >
                 <div>
-                  {/* 1. Large Cover Art - Visual Hero */}
+                  {/* Cover Art */}
                   <div className="relative w-full aspect-[2/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
                     <Link
                       href={readHref}
@@ -239,7 +217,7 @@ export function LatestUpdatesFeed({
                     )}
                   </div>
 
-                  {/* 2. Details Below Cover */}
+                  {/* Details Below Cover */}
                   <div className="p-2.5 sm:p-3">
                     <Link
                       href={readHref}
@@ -269,7 +247,7 @@ export function LatestUpdatesFeed({
                   </div>
                 </div>
 
-                {/* 3. Action: Read Button */}
+                {/* Action: Read Button */}
                 <div className="p-2.5 sm:p-3 pt-0">
                   <Link
                     href={readHref}

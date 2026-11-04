@@ -124,9 +124,9 @@ describe("BookmarkList and BookmarkCard Figma Edit Mode", () => {
     expect(screen.getByText("อ่านต่อ ตอนที่ 5")).toBeInTheDocument();
     expect(screen.getByText("อ่านต่อ ตอนที่ 10")).toBeInTheDocument();
 
-    // Clicking card in normal mode does NOT call onEditBookmark
-    const cardBtn = screen.getByRole("button", { name: "นิยายเรื่องที่หนึ่ง - นักเขียน ก" });
-    fireEvent.click(cardBtn);
+    // Clicking card link in normal mode does not call onEditBookmark
+    const cardLink = screen.getByRole("link", { name: "นิยายเรื่องที่หนึ่ง" });
+    fireEvent.click(cardLink);
     expect(handleEditBookmark).not.toHaveBeenCalled();
   });
 

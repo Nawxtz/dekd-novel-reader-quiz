@@ -40,9 +40,10 @@ export function BookmarkModal({
   onExport,
   onImport,
 }: BookmarkModalProps) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -57,12 +58,14 @@ export function BookmarkModal({
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [importMessage, setImportMessage] = useState<string | null>(null);
   const [importMode, setImportMode] = useState<"replace" | "merge">("merge");
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
     if (isOpen) {
+      triggerRef.current = document.activeElement as HTMLElement | null;
       if (!dialog.open) {
         dialog.showModal();
       }
@@ -77,7 +80,6 @@ export function BookmarkModal({
         setStatus(initialBookmark.status);
         setNote(initialBookmark.note || "");
       } else {
-        // Reset defaults
         setTitle("");
         setAuthor("");
         setCoverUrl("https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&auto=format&fit=crop&q=80");
@@ -90,12 +92,21 @@ export function BookmarkModal({
       }
       setFormErrors({});
       setImportMessage(null);
+      setIsConfirmingDelete(false);
     } else {
       if (dialog.open) {
         dialog.close();
       }
+      setIsConfirmingDelete(false);
+      triggerRef.current?.focus();
     }
   }, [isOpen, initialBookmark]);
+
+  const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    if (e.target === dialogRef.current) {
+      onClose();
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,10 +181,11 @@ export function BookmarkModal({
     <dialog
       ref={dialogRef}
       onClose={onClose}
+      onClick={handleDialogClick}
       aria-labelledby="bookmark-modal-title"
-      className="m-auto p-0 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto focus:outline-none"
+      className="m-auto p-0 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/90 dark:border-gray-800 shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto focus:outline-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
     >
-      <div className="p-6">
+      <div className="p-6" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 mb-5">
           <div className="flex items-center gap-2.5">
@@ -187,7 +199,7 @@ export function BookmarkModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -198,53 +210,73 @@ export function BookmarkModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Title */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="bookmark-modal-title-input"
+              className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+            >
               {t.modal.fieldTitle} <span className="text-red-500">*</span>
             </label>
             <input
+              id="bookmark-modal-title-input"
               type="text"
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="ระบุชื่อเรื่องนิยาย"
+              aria-invalid={Boolean(formErrors.title)}
+              aria-describedby={formErrors.title ? "bookmark-title-error" : undefined}
               className={`w-full px-3.5 py-2 text-sm rounded-xl border bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-dekd-orange/20 transition-all ${
-                formErrors.title ? "border-red-500" : "border-gray-200 dark:border-gray-700"
+                formErrors.title ? "border-red-500" : "border-gray-200 dark:border-gray-750"
               }`}
             />
             {formErrors.title && (
-              <p className="text-xs text-red-500 mt-1">{formErrors.title}</p>
+              <p id="bookmark-title-error" role="alert" className="text-xs text-red-500 mt-1">
+                {formErrors.title}
+              </p>
             )}
           </div>
 
-          {/* Author & Category */}
+          {/* Author and Category */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="bookmark-modal-author-input"
+                className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {t.modal.fieldAuthor} <span className="text-red-500">*</span>
               </label>
               <input
+                id="bookmark-modal-author-input"
                 type="text"
                 required
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="ระบุชื่อผู้แต่ง"
+                aria-invalid={Boolean(formErrors.author)}
+                aria-describedby={formErrors.author ? "bookmark-author-error" : undefined}
                 className={`w-full px-3.5 py-2 text-sm rounded-xl border bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-dekd-orange/20 transition-all ${
-                  formErrors.author ? "border-red-500" : "border-gray-200 dark:border-gray-700"
+                  formErrors.author ? "border-red-500" : "border-gray-200 dark:border-gray-750"
                 }`}
               />
               {formErrors.author && (
-                <p className="text-xs text-red-500 mt-1">{formErrors.author}</p>
+                <p id="bookmark-author-error" role="alert" className="text-xs text-red-500 mt-1">
+                  {formErrors.author}
+                </p>
               )}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="bookmark-modal-category-select"
+                className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {t.modal.fieldCategory}
               </label>
               <select
+                id="bookmark-modal-category-select"
                 value={category}
                 onChange={(e) => setCategory(e.target.value as Category)}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-dekd-orange/20 transition-all"
               >
                 {NOVEL_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -255,25 +287,31 @@ export function BookmarkModal({
             </div>
           </div>
 
-          {/* Cover URL & Thumbnail Preview */}
+          {/* Cover URL and Thumbnail Preview */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="bookmark-modal-cover-url-input"
+              className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+            >
               {t.modal.fieldCoverUrl} <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-3 items-center">
               <input
+                id="bookmark-modal-cover-url-input"
                 type="url"
                 required
                 value={coverUrl}
                 onChange={(e) => setCoverUrl(e.target.value)}
                 placeholder="https://images.unsplash.com/photo-example"
+                aria-invalid={Boolean(formErrors.coverUrl)}
+                aria-describedby={formErrors.coverUrl ? "bookmark-cover-url-error" : undefined}
                 className={`flex-1 px-3.5 py-2 text-sm rounded-xl border bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-dekd-orange/20 transition-all ${
-                  formErrors.coverUrl ? "border-red-500" : "border-gray-200 dark:border-gray-700"
+                  formErrors.coverUrl ? "border-red-500" : "border-gray-200 dark:border-gray-750"
                 }`}
               />
-              <div className="w-10 h-14 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 border border-gray-200 dark:border-gray-700 relative">
-                {isValidHttpsUrl(coverUrl) ? (
-                  <Image src={coverUrl} alt="Preview" fill sizes="40px" className="object-cover" />
+              <div className="w-10 h-14 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 border border-gray-200 dark:border-gray-750 relative">
+                {coverUrl && isValidHttpsUrl(coverUrl) ? (
+                  <Image src={coverUrl.trim()} alt="Preview" fill sizes="40px" className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
                     <ImageIcon className="w-4 h-4" />
@@ -282,46 +320,62 @@ export function BookmarkModal({
               </div>
             </div>
             {formErrors.coverUrl && (
-              <p className="text-xs text-red-500 mt-1">{formErrors.coverUrl}</p>
+              <p id="bookmark-cover-url-error" role="alert" className="text-xs text-red-500 mt-1">
+                {formErrors.coverUrl}
+              </p>
             )}
           </div>
 
-          {/* Chapters & Status */}
+          {/* Chapters and Status */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="bookmark-modal-current-chapter-input"
+                className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {t.modal.fieldCurrentChapter}
               </label>
               <input
+                id="bookmark-modal-current-chapter-input"
                 type="number"
                 min="0"
                 value={currentChapter}
-                onChange={(e) => setCurrentChapter(parseInt(e.target.value) || 0)}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+                onChange={(e) => setCurrentChapter(parseInt(e.target.value, 10) || 0)}
+                aria-invalid={Boolean(formErrors.currentChapter)}
+                aria-describedby={formErrors.currentChapter ? "bookmark-current-chapter-error" : undefined}
+                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="bookmark-modal-total-chapters-input"
+                className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {t.modal.fieldTotalChapters}
               </label>
               <input
+                id="bookmark-modal-total-chapters-input"
                 type="number"
                 min="1"
                 value={totalChapters}
-                onChange={(e) => setTotalChapters(parseInt(e.target.value) || 1)}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+                onChange={(e) => setTotalChapters(parseInt(e.target.value, 10) || 1)}
+                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="bookmark-modal-status-select"
+                className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {t.modal.fieldStatus}
               </label>
               <select
+                id="bookmark-modal-status-select"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as ReadingStatus)}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
               >
                 <option value="reading">{t.status.reading}</option>
                 <option value="completed">{t.status.completed}</option>
@@ -330,52 +384,82 @@ export function BookmarkModal({
             </div>
           </div>
           {formErrors.currentChapter && (
-            <p className="text-xs text-red-500">{formErrors.currentChapter}</p>
+            <p id="bookmark-current-chapter-error" role="alert" className="text-xs text-red-500">
+              {formErrors.currentChapter}
+            </p>
           )}
 
           {/* Chapter Title */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="bookmark-modal-current-chapter-title-input"
+              className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+            >
               {t.modal.fieldChapterTitle}
             </label>
             <input
+              id="bookmark-modal-current-chapter-title-input"
               type="text"
               value={currentChapterTitle}
               onChange={(e) => setCurrentChapterTitle(e.target.value)}
-              placeholder="เช่น ชายารองแห่งจวนอ๋อง"
-              className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+              placeholder="ระบุชื่อตอน เช่น ชายารองแห่งจวนอ๋อง"
+              className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
             />
           </div>
 
           {/* Personal Note */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="bookmark-modal-note-textarea"
+              className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+            >
               {t.modal.fieldNote}
             </label>
             <textarea
+              id="bookmark-modal-note-textarea"
               rows={2}
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="บันทึกความรู้สึก หรือจุดที่อ่านค้างไว้"
-              className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+              className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
             />
           </div>
 
           {/* Modal Actions */}
           <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
             {initialBookmark && onDelete ? (
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirm(t.bookmarks.deleteConfirm(initialBookmark.title))) {
-                    onDelete(initialBookmark.id);
-                    onClose();
-                  }
-                }}
-                className="px-3.5 py-2 text-xs sm:text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors"
-              >
-                {t.bookmarks.deleteSingle}
-              </button>
+              isConfirmingDelete ? (
+                <div className="flex items-center gap-2 p-1.5 px-2.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50">
+                  <span className="text-xs font-medium text-red-700 dark:text-red-300">
+                    {locale === "th" ? "ยืนยันการลบที่คั่นนี้ใช่หรือไม่?" : "Confirm deleting this bookmark?"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onDelete(initialBookmark.id);
+                      onClose();
+                    }}
+                    className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-xs active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-600"
+                  >
+                    {t.editMode.confirm}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmingDelete(false)}
+                    className="px-2.5 py-1 text-xs font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
+                  >
+                    {t.modal.cancel}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmingDelete(true)}
+                  className="px-3.5 py-2 text-xs sm:text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                >
+                  {t.bookmarks.deleteSingle}
+                </button>
+              )
             ) : (
               <div />
             )}
@@ -384,13 +468,13 @@ export function BookmarkModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
               >
                 {t.modal.cancel}
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover rounded-xl shadow-sm shadow-orange-500/25 active:scale-95 transition-all"
+                className="px-5 py-2 text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover rounded-xl shadow-sm shadow-orange-500/25 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dekd-orange"
               >
                 {t.modal.save}
               </button>
@@ -398,17 +482,21 @@ export function BookmarkModal({
           </div>
         </form>
 
-        {/* Data Backup & Import Accordion Section */}
+        {/* Data Backup and Import Section */}
         <div className="mt-6 pt-5 border-t border-gray-200 dark:border-gray-800">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold text-gray-600 dark:text-gray-400">
+            <label
+              htmlFor="bookmark-modal-import-mode-select"
+              className="text-xs font-bold text-gray-600 dark:text-gray-400 cursor-pointer"
+            >
               {t.modal.importExport}
-            </span>
+            </label>
             <div className="flex items-center gap-2">
               <select
+                id="bookmark-modal-import-mode-select"
                 value={importMode}
                 onChange={(e) => setImportMode(e.target.value as "replace" | "merge")}
-                className="text-xs px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                className="text-xs px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
               >
                 <option value="merge">{t.modal.importMerge}</option>
                 <option value="replace">{t.modal.importReplace}</option>
@@ -420,13 +508,13 @@ export function BookmarkModal({
             <button
               type="button"
               onClick={handleExportClick}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
             >
               <Download className="w-3.5 h-3.5" />
               {t.modal.exportJson}
             </button>
 
-            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-dekd-orange rounded-lg">
               <Upload className="w-3.5 h-3.5" />
               <span>{t.modal.importJson}</span>
               <input

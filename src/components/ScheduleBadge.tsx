@@ -5,7 +5,7 @@ import { Calendar } from "lucide-react";
 import { useI18n } from "@/context/I18nContext";
 
 export interface ReleaseSchedule {
-  daysOfWeek?: number[]; // 0 = Sun, 1 = Mon, ..., 6 = Sat
+  daysOfWeek?: number[]; // 0 = Sun, 1 = Mon, to 6 = Sat
   days?: (1 | 2 | 3 | 4 | 5 | 6 | 7)[]; // 1 = Mon, 7 = Sun or similar
   timeString?: string;
   time?: string;

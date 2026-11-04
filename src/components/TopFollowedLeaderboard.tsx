@@ -4,9 +4,9 @@ import React, { useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Flame, Star, Users, Check, BookmarkPlus } from "lucide-react";
-import { useBookmarks } from "@/hooks/useBookmarks";
+import { useBookmarkContext } from "@/context/BookmarkContext";
 import { useI18n } from "@/context/I18nContext";
-import { CatalogNovel, Category, NOVEL_CATEGORIES } from "@/types/novel";
+import { CatalogNovel } from "@/types/novel";
 import { CATALOG_NOVELS } from "@/data/mockNovels";
 
 export type LeaderboardPeriod = "week" | "month" | "all";
@@ -33,7 +33,7 @@ export function TopFollowedLeaderboard({
   className = "",
 }: TopFollowedLeaderboardProps) {
   const [period, setPeriod] = useState<LeaderboardPeriod>("week");
-  const { bookmarks, addBookmark, deleteBookmark } = useBookmarks();
+  const { bookmarks, toggleBookmarkFromCatalog } = useBookmarkContext();
   const { locale } = useI18n();
   const isEn = locale === "en";
 
@@ -62,31 +62,9 @@ export function TopFollowedLeaderboard({
 
   const handleToggleBookmark = useCallback(
     (novel: CatalogNovel) => {
-      const existingBookmarkId =
-        bookmarkedMap.get(novel.id) ||
-        bookmarkedMap.get(novel.titleTh.trim().toLowerCase());
-
-      if (existingBookmarkId) {
-        deleteBookmark(existingBookmarkId);
-      } else {
-        const validCategory: Category = NOVEL_CATEGORIES.includes(novel.category as Category)
-          ? (novel.category as Category)
-          : "แฟนตาซี";
-
-        addBookmark({
-          title: novel.titleTh,
-          author: novel.author,
-          coverUrl: novel.coverUrl,
-          category: validCategory,
-          currentChapter: 1,
-          totalChapters: novel.totalChapters || 50,
-          currentChapterTitle: novel.latestChapter?.titleTh || "",
-          status: "reading",
-          note: "",
-        });
-      }
+      toggleBookmarkFromCatalog(novel);
     },
-    [bookmarkedMap, addBookmark, deleteBookmark]
+    [toggleBookmarkFromCatalog]
   );
 
   return (
