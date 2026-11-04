@@ -63,8 +63,8 @@ export function BookmarkCard({
               onError={() => setImageError(true)}
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gradient-to-br from-orange-100 to-amber-200 dark:from-gray-800 dark:to-gray-750 text-gray-500">
-              <span className="text-xs font-bold text-dekd-orange leading-relaxed line-clamp-3" lang="th">
+            <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gradient-to-br from-orange-100 to-amber-200 dark:from-gray-800 dark:to-gray-700 text-gray-500 dark:text-slate-400">
+              <span className="text-xs font-bold text-dekd-orange dark:text-orange-400 leading-relaxed line-clamp-3" lang="th">
                 {bookmark.title}
               </span>
             </div>
@@ -75,7 +75,7 @@ export function BookmarkCard({
 
           {/* Category Badge */}
           <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
-            <span className="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold text-white bg-black/60 backdrop-blur-md border border-white/20 shadow-xs">
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold text-white bg-black/60 backdrop-blur-md border border-white/20 shadow-xs">
               {bookmark.category}
             </span>
           </div>
@@ -112,20 +112,20 @@ export function BookmarkCard({
               title={locale === "th" ? `ลบที่คั่น ${bookmark.title}` : `Delete bookmark ${bookmark.title}`}
               aria-label={locale === "th" ? `ลบที่คั่น ${bookmark.title}` : `Delete bookmark ${bookmark.title}`}
             >
-              <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md active:scale-90 bg-black/50 text-white/90 hover:bg-red-600 hover:text-white border border-white/20">
+              <span className="hit-area w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md active:scale-90 bg-black/50 text-white/90 hover:bg-red-600 hover:text-white border border-white/20">
                 <Trash2 className="w-3.5 h-3.5" />
               </span>
             </button>
           )}
 
           {/* Cover Bottom: Progress Info and Bar */}
-          <div className="absolute bottom-2 left-2 right-2 z-10 flex items-center justify-between text-[10px] sm:text-[11px] font-medium text-white/95 px-2 py-0.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 shadow-xs">
+          <div className="absolute bottom-2 left-2 right-2 z-10 flex items-center justify-between text-xs font-medium text-white/95 px-2 py-0.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 shadow-xs">
             <span className="truncate">
               {locale === "th"
                 ? `ตอนที่ ${bookmark.currentChapter}/${bookmark.totalChapters}`
                 : `Ch. ${bookmark.currentChapter}/${bookmark.totalChapters}`}
             </span>
-            <span className="text-[10px] font-bold text-orange-400 shrink-0 ml-1">
+            <span className="text-xs font-bold text-orange-400 shrink-0 ml-1">
               {progressPercent}%
             </span>
           </div>
@@ -150,7 +150,7 @@ export function BookmarkCard({
             <button
               type="button"
               onClick={() => onToggleSelect(bookmark.id)}
-              className="w-full text-left font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors line-clamp-2 leading-relaxed break-words min-h-[3rem] focus:outline-none focus-visible:underline after:absolute after:inset-0 after:content-[''] after:z-0 cursor-pointer"
+              className="w-full text-left font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 hover:text-orange-700 dark:hover:text-orange-400 transition-colors line-clamp-2 leading-relaxed break-words min-h-[3rem] focus:outline-none focus-visible:underline after:absolute after:inset-0 after:content-[''] after:z-0 cursor-pointer"
               lang="th"
               title={bookmark.title}
               aria-label={`${isSelected ? (locale === "th" ? "ยกเลิกการเลือก" : "Deselect") : (locale === "th" ? "เลือก" : "Select")} ${bookmark.title}`}
@@ -160,7 +160,7 @@ export function BookmarkCard({
           ) : (
             <Link
               href={readRoute}
-              className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors line-clamp-2 leading-relaxed break-words min-h-[3rem] focus:outline-none focus-visible:underline after:absolute after:inset-0 after:content-[''] after:z-0"
+              className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 hover:text-orange-700 dark:hover:text-orange-400 transition-colors line-clamp-2 leading-relaxed break-words min-h-[3rem] focus:outline-none focus-visible:underline after:absolute after:inset-0 after:content-[''] after:z-0"
               lang="th"
               title={bookmark.title}
             >
@@ -170,15 +170,15 @@ export function BookmarkCard({
 
           {/* Author */}
           <p
-            className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate mt-1 leading-normal"
+            className="text-xs text-slate-500 dark:text-slate-400 truncate mt-1 leading-normal"
             lang="th"
           >
             โดย {bookmark.author}
           </p>
 
           {/* Bookmark Timestamp */}
-          <div className="mt-1 flex items-center gap-1 text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500">
-            <BookmarkIcon className="w-3 h-3 text-dekd-orange shrink-0 fill-dekd-orange" />
+          <div className="mt-1 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+            <BookmarkIcon className="w-3 h-3 text-dekd-orange dark:text-orange-400 shrink-0 fill-dekd-orange" />
             <time dateTime={bookmark.lastReadAt} className="truncate">
               {formatBookmarkDate(bookmark.lastReadAt, locale)}
             </time>
@@ -192,7 +192,7 @@ export function BookmarkCard({
           <div
             className={`relative z-10 w-full py-1.5 px-2.5 rounded-xl text-xs font-medium text-center transition-colors select-none ${
               isSelected
-                ? "bg-dekd-orange/15 text-dekd-orange font-semibold dark:bg-orange-950/40"
+                ? "bg-dekd-orange/15 text-dekd-orange dark:text-orange-400 font-semibold dark:bg-orange-950/40"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
             }`}
             aria-hidden="true"
@@ -206,7 +206,7 @@ export function BookmarkCard({
             href={readRoute}
             tabIndex={-1}
             aria-hidden="true"
-            className="relative z-10 w-full inline-flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl text-xs font-semibold bg-orange-500 hover:bg-orange-600 active:scale-98 text-white transition-all shadow-xs focus:outline-none"
+            className="relative z-10 w-full inline-flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl text-xs font-semibold border border-orange-300 dark:border-orange-800 bg-white dark:bg-transparent text-orange-700 dark:text-orange-400 hover:bg-orange-700 hover:text-white hover:border-orange-700 dark:hover:bg-orange-700 dark:hover:text-white active:scale-98 transition-all shadow-xs focus:outline-none"
             title={`${locale === "th" ? `อ่านต่อ ตอนที่ ${bookmark.currentChapter}` : `Continue Ch. ${bookmark.currentChapter}`} ${bookmark.title}`}
           >
             <BookOpen className="w-3.5 h-3.5 shrink-0" />

@@ -103,4 +103,28 @@ dialog::backdrop {
   .elevation-high {
     box-shadow: var(--surface-elevation-high);
   }
+
+  /* Enlarges the tap target of small controls to about 44px without changing layout */
+  /* Already-positioned elements keep their own position */
+  .hit-area:not(.absolute, .fixed, .sticky) {
+    position: relative;
+  }
+
+  .hit-area::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+  }
+
+  /* Vertical-only variant for chips and buttons sitting side by side in a row */
+  /* Already-positioned elements keep their own position */
+  .hit-area-y:not(.absolute, .fixed, .sticky) {
+    position: relative;
+  }
+
+  .hit-area-y::after {
+    content: "";
+    position: absolute;
+    inset: -8px 0;
+  }
 }

@@ -66,8 +66,8 @@ export function LatestUpdatesFeed({
       {/* Header & Author Filter Chip */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-slate-200/80 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-950/60 flex items-center justify-center text-orange-600 dark:text-orange-400">
-            <Sparkles className="w-4 h-4 fill-orange-500 text-orange-500" />
+          <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-950/60 flex items-center justify-center text-orange-700 dark:text-orange-400">
+            <Sparkles className="w-4 h-4 fill-orange-500 text-orange-700" />
           </div>
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
@@ -110,7 +110,7 @@ export function LatestUpdatesFeed({
             <button
               type="button"
               onClick={onClearAuthor}
-              className="mt-3 px-4 py-2 text-xs font-semibold text-orange-600 bg-orange-50 dark:bg-orange-950/40 rounded-lg hover:bg-orange-100 transition-colors"
+              className="mt-3 px-4 py-2 text-xs font-semibold text-orange-700 bg-orange-50 dark:bg-orange-950/40 rounded-lg hover:bg-orange-100 transition-colors"
             >
               {isEn ? "View all novels" : "ดูนิยายทั้งหมด"}
             </button>
@@ -154,11 +154,11 @@ export function LatestUpdatesFeed({
 
                     {/* Floating Category Tag on Top-Left */}
                     <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5 pointer-events-none">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold text-white bg-black/60 backdrop-blur-md border border-white/20 shadow-xs">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-bold text-white bg-black/60 backdrop-blur-md border border-white/20 shadow-xs">
                         {novel.category}
                       </span>
                       {novel.status?.kind === "completed" && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold text-emerald-300 bg-emerald-950/70 backdrop-blur-md border border-emerald-500/30">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold text-emerald-300 bg-emerald-950/70 backdrop-blur-md border border-emerald-500/30">
                           {isEn ? "Ended" : "จบแล้ว"}
                         </span>
                       )}
@@ -171,7 +171,7 @@ export function LatestUpdatesFeed({
                         e.stopPropagation();
                         handleToggleBookmark(novel);
                       }}
-                      className={`absolute top-2.5 right-2.5 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md active:scale-90 ${
+                      className={`absolute top-2.5 right-2.5 z-10 hit-area w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md active:scale-90 ${
                         isSaved
                           ? "bg-dekd-orange text-white ring-2 ring-white/60"
                           : "bg-black/50 text-white/90 hover:bg-black/70 hover:text-white border border-white/20"
@@ -207,10 +207,10 @@ export function LatestUpdatesFeed({
                     {novel.latestChapter && (
                       <Link
                         href={readHref}
-                        className="absolute bottom-2 left-2 right-2 z-10 flex items-center justify-between text-[10px] sm:text-[11px] font-medium text-white/95 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 transition-colors shadow-xs"
+                        className="hit-area absolute bottom-2 left-2 right-2 z-10 flex items-center justify-between text-xs font-medium text-white/95 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 transition-colors shadow-xs"
                       >
                         <span className="truncate">{novel.latestChapter.titleTh}</span>
-                        <span className="text-[9px] sm:text-[10px] text-orange-400 font-semibold shrink-0 ml-1">
+                        <span className="text-xs text-orange-400 font-semibold shrink-0 ml-1">
                           {isEn ? "NEW" : "ใหม่"}
                         </span>
                       </Link>
@@ -221,26 +221,26 @@ export function LatestUpdatesFeed({
                   <div className="p-2.5 sm:p-3">
                     <Link
                       href={readHref}
-                      className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors line-clamp-2 leading-snug min-h-[2rem] sm:min-h-[2.5rem]"
+                      className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 hover:text-orange-700 dark:hover:text-orange-400 transition-colors line-clamp-2 leading-snug min-h-[2.75rem]"
                       title={novel.titleTh}
                     >
                       {novel.titleTh}
                     </Link>
 
                     {/* Author & Chapter Count */}
-                    <div className="mt-1 flex items-center justify-between text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+                    <div className="mt-1 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                       <div className="flex items-center gap-1 min-w-0">
-                        <span className="text-slate-400 text-[10px] shrink-0">{isEn ? "By" : "โดย"}</span>
+                        <span className="text-slate-500 text-xs shrink-0 dark:text-slate-400">{isEn ? "By" : "โดย"}</span>
                         <button
                           type="button"
                           onClick={() => onSelectAuthor?.(novel.author)}
-                          className="font-medium text-slate-700 dark:text-slate-300 hover:text-orange-500 dark:hover:text-orange-400 underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2 transition-colors truncate max-w-[100px] sm:max-w-[130px]"
+                          className="hit-area-y font-medium text-slate-700 dark:text-slate-300 hover:text-orange-700 dark:hover:text-orange-400 underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2 transition-colors truncate max-w-[100px] sm:max-w-[130px]"
                           title={`กรองผลงานของ ${novel.author}`}
                         >
                           {novel.author}
                         </button>
                       </div>
-                      <span className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 shrink-0">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">
                         {novel.totalChapters} ตอน
                       </span>
                     </div>
@@ -251,7 +251,7 @@ export function LatestUpdatesFeed({
                 <div className="p-2.5 sm:p-3 pt-0">
                   <Link
                     href={readHref}
-                    className="w-full inline-flex items-center justify-center gap-1 py-1.5 px-2.5 rounded-xl text-xs font-semibold bg-orange-500 hover:bg-orange-600 active:scale-98 text-white transition-all shadow-xs"
+                    className="hit-area-y w-full inline-flex items-center justify-center gap-1 py-1.5 px-2.5 rounded-xl text-xs font-semibold border border-orange-300 dark:border-orange-800 bg-white dark:bg-transparent text-orange-700 dark:text-orange-400 hover:bg-orange-700 hover:text-white hover:border-orange-700 dark:hover:bg-orange-700 dark:hover:text-white active:scale-98 transition-all shadow-xs"
                   >
                     <BookOpen className="w-3.5 h-3.5 shrink-0" />
                     <span>{isEn ? "Read" : "อ่านตอนล่าสุด"}</span>

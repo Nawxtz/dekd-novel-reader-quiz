@@ -66,7 +66,7 @@ export function KeyboardCheatSheet({
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-gray-100 dark:border-gray-800 mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-dekd-orange flex items-center justify-center">
+            <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-dekd-orange dark:text-orange-400 flex items-center justify-center">
               <Keyboard className="w-5 h-5" />
             </div>
             <div>
@@ -81,7 +81,7 @@ export function KeyboardCheatSheet({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
+            className="p-1.5 rounded-full text-gray-500 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange dark:text-slate-400"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -112,7 +112,7 @@ export function KeyboardCheatSheet({
         {/* WCAG 2.1.4 Toggle */}
         <div className="flex items-center justify-between p-3 rounded-xl bg-orange-50/50 dark:bg-orange-950/30 border border-orange-200/60 dark:border-orange-900/40 mb-5">
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-dekd-orange shrink-0" />
+            <Shield className="w-4 h-4 text-dekd-orange dark:text-orange-400 shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
               {t.shortcuts.toggleLabel}
             </span>

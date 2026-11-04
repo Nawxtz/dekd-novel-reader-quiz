@@ -58,7 +58,7 @@ export function ScheduleBadge({
     <span
       data-testid="schedule-badge"
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-medium transition-colors select-none bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60 ${
-        compact ? "text-[11px]" : "text-xs"
+        compact ? "text-xs" : "text-xs"
       } ${className}`}
       title={fullLabel}
       aria-label={`กำหนดการอัปเดต: ${fullLabel}`}

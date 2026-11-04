@@ -42,14 +42,14 @@ export function RelatedNovelsShelf({
     >
       <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-orange-500" />
+          <BookOpen className="w-5 h-5 text-orange-700 dark:text-orange-400" />
           <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
             {isEn ? "You May Also Like" : "เรื่องที่คุณอาจชอบ"}
           </h3>
         </div>
         <Link
           href="/"
-          className="text-xs font-semibold text-orange-500 hover:text-orange-600 flex items-center gap-0.5"
+          className="hit-area text-xs font-semibold text-orange-700 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 flex items-center gap-0.5"
         >
           <span>{isEn ? "See all" : "ดูทั้งหมด"}</span>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -76,10 +76,10 @@ export function RelatedNovelsShelf({
               <h4 className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-slate-100 truncate group-hover:text-orange-500 transition-colors">
                 {novel.titleTh}
               </h4>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                 {novel.author}
               </p>
-              <div className="mt-1 flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+              <div className="mt-1 flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400 font-medium">
                 <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                 <span>{novel.rating?.toFixed(1) ?? "9.0"}</span>
               </div>

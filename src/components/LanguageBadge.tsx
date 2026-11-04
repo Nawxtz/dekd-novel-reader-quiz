@@ -51,7 +51,7 @@ export function LanguageBadge({
     <span
       data-testid="language-badge"
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-medium transition-colors select-none ${
-        compact ? "text-[11px]" : "text-xs"
+        compact ? "text-xs" : "text-xs"
       } ${config.classes} ${className}`}
       title={label}
       aria-label={`ภาษา: ${label}`}

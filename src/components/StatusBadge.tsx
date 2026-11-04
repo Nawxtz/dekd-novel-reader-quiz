@@ -24,7 +24,7 @@ export function StatusBadge({
       <span
         data-testid="status-badge-ongoing"
         className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-medium transition-colors select-none bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60 ${
-          compact ? "text-[11px]" : "text-xs"
+          compact ? "text-xs" : "text-xs"
         } ${className}`}
         title={label}
         aria-label={`สถานะ: ${label}`}
@@ -52,12 +52,12 @@ export function StatusBadge({
       <span
         data-testid="status-badge-season-break"
         className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-medium transition-colors select-none bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60 ${
-          compact ? "text-[11px]" : "text-xs"
+          compact ? "text-xs" : "text-xs"
         } ${className}`}
         title={label}
         aria-label={`สถานะ: ${label}`}
       >
-        <Clock className="w-3 h-3 flex-shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+        <Clock className="w-3 h-3 flex-shrink-0 text-amber-700 dark:text-amber-400" aria-hidden="true" />
         <span>{label}</span>
       </span>
     );
@@ -76,7 +76,7 @@ export function StatusBadge({
       <span
         data-testid="status-badge-hiatus"
         className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-medium transition-colors select-none bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60 ${
-          compact ? "text-[11px]" : "text-xs"
+          compact ? "text-xs" : "text-xs"
         } ${className}`}
         title={label}
         aria-label={`สถานะ: ${label}`}
@@ -93,7 +93,7 @@ export function StatusBadge({
       <span
         data-testid="status-badge-completed"
         className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-medium transition-colors select-none bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 ${
-          compact ? "text-[11px]" : "text-xs"
+          compact ? "text-xs" : "text-xs"
         } ${className}`}
         title={label}
         aria-label={`สถานะ: ${label}`}

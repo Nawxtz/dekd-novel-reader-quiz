@@ -89,7 +89,7 @@ export function ReaderToolbar({
           <Link
             href="/"
             data-novel-id={novelId}
-            className={`p-2 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-semibold ${
+            className={`hit-area p-2 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-semibold ${
               theme === "night"
                 ? "hover:bg-slate-800 text-slate-300"
                 : theme === "sepia"
@@ -109,7 +109,7 @@ export function ReaderToolbar({
             <h1 className="text-xs sm:text-sm font-bold truncate max-w-[200px] sm:max-w-[340px] md:max-w-[450px]">
               {novelTitle}
             </h1>
-            <p className="text-[11px] opacity-75 truncate">
+            <p className="text-xs opacity-75 truncate">
               {isEn
                 ? `Chapter ${currentChapter} / ${totalChapters}`
                 : `ตอนที่ ${currentChapter} จาก ${totalChapters} ตอน`}
@@ -136,8 +136,8 @@ export function ReaderToolbar({
                 onClick={() => onContentLocaleChange("th")}
                 className={`px-2.5 py-1 rounded-lg transition-all text-xs font-semibold ${
                   contentLocale === "th"
-                    ? "bg-orange-500 text-white shadow-xs"
-                    : "hover:text-orange-500"
+                    ? "bg-orange-700 text-white shadow-xs"
+                    : "hover:text-orange-700"
                 }`}
                 title="อ่านภาษาไทย"
               >
@@ -148,8 +148,8 @@ export function ReaderToolbar({
                 onClick={() => onContentLocaleChange("en")}
                 className={`px-2.5 py-1 rounded-lg transition-all text-xs font-semibold ${
                   contentLocale === "en"
-                    ? "bg-orange-500 text-white shadow-xs"
-                    : "hover:text-orange-500"
+                    ? "bg-orange-700 text-white shadow-xs"
+                    : "hover:text-orange-700"
                 }`}
                 title="Read in English"
               >
@@ -172,13 +172,13 @@ export function ReaderToolbar({
               type="button"
               onClick={handleDecreaseFont}
               disabled={fontSizeIndex <= 0}
-              className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors font-bold ${
+              className={`hit-area w-7 h-7 flex items-center justify-center rounded-lg transition-colors font-bold ${
                 fontSizeIndex <= 0
                   ? "opacity-30 cursor-not-allowed"
                   : "hover:bg-black/5 dark:hover:bg-white/10"
               }`}
               title={isEn ? "Decrease font size (A-)" : "ลดขนาดตัวอักษร (A-)"}
-              aria-label="Decrease font size"
+              aria-label={isEn ? "Decrease font size" : "ลดขนาดตัวอักษร"}
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
@@ -191,13 +191,13 @@ export function ReaderToolbar({
               type="button"
               onClick={handleIncreaseFont}
               disabled={fontSizeIndex >= FONT_SIZE_STEPS.length - 1}
-              className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors font-bold ${
+              className={`hit-area w-7 h-7 flex items-center justify-center rounded-lg transition-colors font-bold ${
                 fontSizeIndex >= FONT_SIZE_STEPS.length - 1
                   ? "opacity-30 cursor-not-allowed"
                   : "hover:bg-black/5 dark:hover:bg-white/10"
               }`}
               title={isEn ? "Increase font size (A+)" : "เพิ่มขนาดตัวอักษร (A+)"}
-              aria-label="Increase font size"
+              aria-label={isEn ? "Increase font size" : "เพิ่มขนาดตัวอักษร"}
             >
               <Plus className="w-3.5 h-3.5" />
             </button>
@@ -207,15 +207,15 @@ export function ReaderToolbar({
           <button
             type="button"
             onClick={() => onFontFamilyChange(fontFamily === "sans" ? "serif" : "sans")}
-            className={`h-8 px-2.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+            className={`hit-area-y h-8 px-2.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-colors ${
               theme === "night"
                 ? "bg-slate-900 border-slate-800 hover:bg-slate-800"
                 : theme === "sepia"
                 ? "bg-[#ecdcb8] border-[#dfcd9f] hover:bg-[#e4d3a9]"
                 : "bg-slate-100 border-slate-200 hover:bg-slate-200"
             }`}
-            title={fontFamily === "sans" ? "สลับเป็นฟอนต์ Serif" : "สลับเป็นฟอนต์ Sans"}
-            aria-label="Toggle font family"
+            title={isEn ? "Toggle font family" : fontFamily === "sans" ? "สลับเป็นฟอนต์ Serif" : "สลับเป็นฟอนต์ Sans"}
+            aria-label={isEn ? "Toggle font family" : "สลับฟอนต์"}
           >
             <Type className="w-3.5 h-3.5" />
             <span>{fontFamily === "sans" ? "Sans" : "Serif"}</span>
@@ -234,13 +234,14 @@ export function ReaderToolbar({
             <button
               type="button"
               onClick={() => onThemeChange("day")}
-              className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
+              className={`hit-area w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
                 theme === "day"
-                  ? "bg-white text-orange-500 shadow-xs"
+                  ? "bg-white text-orange-700 shadow-xs"
                   : "opacity-60 hover:opacity-100"
               }`}
               title={isEn ? "Day Mode (Light)" : "โหมดสว่าง (Day)"}
-              aria-label="Day mode"
+              aria-label={isEn ? "Day mode" : "โหมดสว่าง"}
+              aria-pressed={theme === "day"}
             >
               <Sun className="w-3.5 h-3.5" />
             </button>
@@ -248,13 +249,14 @@ export function ReaderToolbar({
             <button
               type="button"
               onClick={() => onThemeChange("sepia")}
-              className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
+              className={`hit-area w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
                 theme === "sepia"
                   ? "bg-[#dfcc9b] text-[#382e25] shadow-xs"
                   : "opacity-60 hover:opacity-100"
               }`}
               title={isEn ? "Sepia Mode (Paper)" : "โหมดถนอมสายตา (Sepia)"}
-              aria-label="Sepia mode"
+              aria-label={isEn ? "Sepia mode" : "โหมดถนอมสายตา"}
+              aria-pressed={theme === "sepia"}
             >
               <Coffee className="w-3.5 h-3.5" />
             </button>
@@ -262,13 +264,14 @@ export function ReaderToolbar({
             <button
               type="button"
               onClick={() => onThemeChange("night")}
-              className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
+              className={`hit-area w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
                 theme === "night"
                   ? "bg-slate-800 text-orange-400 shadow-xs"
                   : "opacity-60 hover:opacity-100"
               }`}
               title={isEn ? "Night Mode (Dark OLED)" : "โหมดมืด (Night OLED)"}
-              aria-label="Night mode"
+              aria-label={isEn ? "Night mode" : "โหมดมืด"}
+              aria-pressed={theme === "night"}
             >
               <Moon className="w-3.5 h-3.5" />
             </button>
@@ -279,17 +282,17 @@ export function ReaderToolbar({
             <button
               type="button"
               onClick={onToggleBookmark}
-              className={`h-8 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              className={`hit-area-y h-8 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all ${
                 isBookmarked
-                  ? "bg-orange-500 text-white border-orange-600 shadow-xs hover:bg-orange-600"
+                  ? "bg-orange-700 text-white border-orange-700 shadow-xs hover:bg-orange-800"
                   : theme === "night"
                   ? "bg-slate-900 border-slate-800 hover:border-orange-500 text-slate-300"
                   : theme === "sepia"
                   ? "bg-[#ecdcb8] border-[#dfcd9f] hover:border-orange-500 text-[#382e25]"
                   : "bg-slate-100 border-slate-200 hover:border-orange-500 text-slate-700"
               }`}
-              title={isBookmarked ? "คั่นเรื่องนี้แล้ว" : "คั่นเรื่องนี้"}
-              aria-label="Bookmark this novel"
+              title={isBookmarked ? (isEn ? "Saved" : "คั่นเรื่องนี้แล้ว") : isEn ? "Bookmark this novel" : "คั่นเรื่องนี้"}
+              aria-label={isBookmarked ? (isEn ? "Saved" : "คั่นเรื่องนี้แล้ว") : isEn ? "Bookmark this novel" : "คั่นเรื่องนี้"}
             >
               {isBookmarked ? (
                 <>

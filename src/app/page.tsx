@@ -158,7 +158,7 @@ export default function Home() {
       />
 
       {/* Footer */}
-      <footer className="w-full py-6 border-t border-gray-200 dark:border-gray-800 text-center text-xs text-gray-400 dark:text-gray-500">
+      <footer className="w-full py-6 border-t border-gray-200 dark:border-gray-800 text-center text-xs text-gray-500 dark:text-slate-400">
         <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>Dek-D Interactive Front-end Developer Intern Take-Home Quiz</span>
           <span>Crafted with Next.js 14, TypeScript, Tailwind CSS and Vitest</span>

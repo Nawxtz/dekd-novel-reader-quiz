@@ -189,7 +189,7 @@ export function BookmarkModal({
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 mb-5">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-dekd-orange flex items-center justify-center">
+            <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-dekd-orange dark:text-orange-400 flex items-center justify-center">
               <BookOpen className="w-5 h-5" />
             </div>
             <h2 id="bookmark-modal-title" className="text-lg font-bold text-gray-900 dark:text-white">
@@ -199,7 +199,7 @@ export function BookmarkModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
+            className="p-1.5 rounded-full text-gray-500 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange dark:text-slate-400"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -207,7 +207,7 @@ export function BookmarkModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           {/* Title */}
           <div>
             <label
@@ -226,11 +226,12 @@ export function BookmarkModal({
               aria-invalid={Boolean(formErrors.title)}
               aria-describedby={formErrors.title ? "bookmark-title-error" : undefined}
               className={`w-full px-3.5 py-2 text-sm rounded-xl border bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-dekd-orange/20 transition-all ${
-                formErrors.title ? "border-red-500" : "border-gray-200 dark:border-gray-750"
+                formErrors.title ? "border-red-500" : "border-gray-200 dark:border-gray-700"
               }`}
             />
             {formErrors.title && (
-              <p id="bookmark-title-error" role="alert" className="text-xs text-red-500 mt-1">
+              <p id="bookmark-title-error" role="alert" className="flex items-center gap-1 text-xs text-red-700 dark:text-red-400 mt-1">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
                 {formErrors.title}
               </p>
             )}
@@ -255,11 +256,12 @@ export function BookmarkModal({
                 aria-invalid={Boolean(formErrors.author)}
                 aria-describedby={formErrors.author ? "bookmark-author-error" : undefined}
                 className={`w-full px-3.5 py-2 text-sm rounded-xl border bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-dekd-orange/20 transition-all ${
-                  formErrors.author ? "border-red-500" : "border-gray-200 dark:border-gray-750"
+                  formErrors.author ? "border-red-500" : "border-gray-200 dark:border-gray-700"
                 }`}
               />
               {formErrors.author && (
-                <p id="bookmark-author-error" role="alert" className="text-xs text-red-500 mt-1">
+                <p id="bookmark-author-error" role="alert" className="flex items-center gap-1 text-xs text-red-700 dark:text-red-400 mt-1">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
                   {formErrors.author}
                 </p>
               )}
@@ -276,7 +278,7 @@ export function BookmarkModal({
                 id="bookmark-modal-category-select"
                 value={category}
                 onChange={(e) => setCategory(e.target.value as Category)}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-dekd-orange/20 transition-all"
               >
                 {NOVEL_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -306,21 +308,22 @@ export function BookmarkModal({
                 aria-invalid={Boolean(formErrors.coverUrl)}
                 aria-describedby={formErrors.coverUrl ? "bookmark-cover-url-error" : undefined}
                 className={`flex-1 px-3.5 py-2 text-sm rounded-xl border bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-dekd-orange/20 transition-all ${
-                  formErrors.coverUrl ? "border-red-500" : "border-gray-200 dark:border-gray-750"
+                  formErrors.coverUrl ? "border-red-500" : "border-gray-200 dark:border-gray-700"
                 }`}
               />
-              <div className="w-10 h-14 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 border border-gray-200 dark:border-gray-750 relative">
+              <div className="w-10 h-14 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 border border-gray-200 dark:border-gray-700 relative">
                 {coverUrl && isValidHttpsUrl(coverUrl) ? (
                   <Image src={coverUrl.trim()} alt="Preview" fill sizes="40px" className="object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <div className="w-full h-full flex items-center justify-center text-gray-500 dark:text-slate-400">
                     <ImageIcon className="w-4 h-4" />
                   </div>
                 )}
               </div>
             </div>
             {formErrors.coverUrl && (
-              <p id="bookmark-cover-url-error" role="alert" className="text-xs text-red-500 mt-1">
+              <p id="bookmark-cover-url-error" role="alert" className="flex items-center gap-1 text-xs text-red-700 dark:text-red-400 mt-1">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
                 {formErrors.coverUrl}
               </p>
             )}
@@ -343,7 +346,7 @@ export function BookmarkModal({
                 onChange={(e) => setCurrentChapter(parseInt(e.target.value, 10) || 0)}
                 aria-invalid={Boolean(formErrors.currentChapter)}
                 aria-describedby={formErrors.currentChapter ? "bookmark-current-chapter-error" : undefined}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
               />
             </div>
 
@@ -360,7 +363,7 @@ export function BookmarkModal({
                 min="1"
                 value={totalChapters}
                 onChange={(e) => setTotalChapters(parseInt(e.target.value, 10) || 1)}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
               />
             </div>
 
@@ -375,7 +378,7 @@ export function BookmarkModal({
                 id="bookmark-modal-status-select"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as ReadingStatus)}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+                className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
               >
                 <option value="reading">{t.status.reading}</option>
                 <option value="completed">{t.status.completed}</option>
@@ -384,7 +387,8 @@ export function BookmarkModal({
             </div>
           </div>
           {formErrors.currentChapter && (
-            <p id="bookmark-current-chapter-error" role="alert" className="text-xs text-red-500">
+            <p id="bookmark-current-chapter-error" role="alert" className="flex items-center gap-1 text-xs text-red-700 dark:text-red-400">
+              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
               {formErrors.currentChapter}
             </p>
           )}
@@ -403,7 +407,7 @@ export function BookmarkModal({
               value={currentChapterTitle}
               onChange={(e) => setCurrentChapterTitle(e.target.value)}
               placeholder="ระบุชื่อตอน เช่น ชายารองแห่งจวนอ๋อง"
-              className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+              className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
             />
           </div>
 
@@ -421,7 +425,7 @@ export function BookmarkModal({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="บันทึกความรู้สึก หรือจุดที่อ่านค้างไว้"
-              className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
+              className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-dekd-orange/20 transition-all"
             />
           </div>
 
@@ -529,7 +533,7 @@ export function BookmarkModal({
 
           {importMessage && (
             <div className="mt-3 p-2.5 rounded-lg bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/40 text-xs text-orange-800 dark:text-orange-200 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-dekd-orange" />
+              <AlertCircle className="w-4 h-4 shrink-0 text-dekd-orange dark:text-orange-400" />
               <span>{importMessage}</span>
             </div>
           )}

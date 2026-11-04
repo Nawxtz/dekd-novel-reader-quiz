@@ -29,8 +29,8 @@ describe("BannerCarousel", () => {
 
   it("navigates to next and previous slides via arrow buttons", () => {
     renderCarousel();
-    const nextBtn = screen.getByLabelText("Next banner");
-    const prevBtn = screen.getByLabelText("Previous banner");
+    const nextBtn = screen.getByLabelText(/Next banner|แบนเนอร์ถัดไป/);
+    const prevBtn = screen.getByLabelText(/Previous banner|แบนเนอร์ก่อนหน้า/);
 
     fireEvent.click(nextBtn);
     expect(screen.getByText(MOCK_BANNERS[1].title)).toBeInTheDocument();

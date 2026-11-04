@@ -76,8 +76,8 @@ export function TopFollowedLeaderboard({
       {/* Header */}
       <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-950/60 flex items-center justify-center text-orange-600 dark:text-orange-400">
-            <Flame className="w-4 h-4 fill-orange-500 text-orange-500" />
+          <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-950/60 flex items-center justify-center text-orange-700 dark:text-orange-400">
+            <Flame className="w-4 h-4 fill-orange-500 text-orange-700" />
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
@@ -95,9 +95,9 @@ export function TopFollowedLeaderboard({
         <button
           type="button"
           onClick={() => setPeriod("week")}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+          className={`hit-area-y flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
             period === "week"
-              ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs"
+              ? "bg-white dark:bg-slate-900 text-orange-700 dark:text-orange-400 shadow-xs"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
           }`}
           aria-pressed={period === "week"}
@@ -107,9 +107,9 @@ export function TopFollowedLeaderboard({
         <button
           type="button"
           onClick={() => setPeriod("month")}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+          className={`hit-area-y flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
             period === "month"
-              ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs"
+              ? "bg-white dark:bg-slate-900 text-orange-700 dark:text-orange-400 shadow-xs"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
           }`}
           aria-pressed={period === "month"}
@@ -119,9 +119,9 @@ export function TopFollowedLeaderboard({
         <button
           type="button"
           onClick={() => setPeriod("all")}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+          className={`hit-area-y flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
             period === "all"
-              ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs"
+              ? "bg-white dark:bg-slate-900 text-orange-700 dark:text-orange-400 shadow-xs"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
           }`}
           aria-pressed={period === "all"}
@@ -141,11 +141,11 @@ export function TopFollowedLeaderboard({
 
           // Rank box styling
           let rankBadgeClass =
-            "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400";
+            "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400";
           if (rank === 1) {
-            rankBadgeClass = "bg-amber-500 text-white shadow-xs";
+            rankBadgeClass = "bg-amber-400 text-amber-950 shadow-xs";
           } else if (rank === 2) {
-            rankBadgeClass = "bg-slate-400 text-white shadow-xs";
+            rankBadgeClass = "bg-slate-500 text-white shadow-xs";
           } else if (rank === 3) {
             rankBadgeClass = "bg-amber-700 text-white shadow-xs";
           }
@@ -166,7 +166,7 @@ export function TopFollowedLeaderboard({
               {/* Cover thumbnail */}
               <Link
                 href={`/read/${novel.id}/1`}
-                className="w-12 h-16 sm:w-13 sm:h-17 rounded-lg overflow-hidden relative flex-shrink-0 bg-slate-200 dark:bg-slate-800 shadow-xs group"
+                className="w-12 h-16 sm:w-14 sm:h-[4.5rem] rounded-lg overflow-hidden relative flex-shrink-0 bg-slate-200 dark:bg-slate-800 shadow-xs group"
                 title={novel.titleTh}
               >
                 <Image
@@ -182,7 +182,7 @@ export function TopFollowedLeaderboard({
               <div className="flex-1 min-w-0 pr-1">
                 <Link
                   href={`/read/${novel.id}/1`}
-                  className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-slate-100 truncate block hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
+                  className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-slate-100 line-clamp-2 break-words hover:text-orange-700 dark:hover:text-orange-400 transition-colors"
                   title={novel.titleTh}
                 >
                   {novel.titleTh}
@@ -193,7 +193,7 @@ export function TopFollowedLeaderboard({
                   <button
                     type="button"
                     onClick={() => onSelectAuthor?.(novel.author)}
-                    className="text-[11px] text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors truncate max-w-[130px] text-left"
+                    className="text-xs text-slate-500 dark:text-slate-400 hover:text-orange-700 dark:hover:text-orange-400 transition-colors truncate max-w-[130px] text-left"
                     title={`กรองผลงานของ ${novel.author}`}
                   >
                     {novel.author}
@@ -201,8 +201,8 @@ export function TopFollowedLeaderboard({
                 </div>
 
                 {/* Rating & Followers */}
-                <div className="mt-1 flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-                  <span className="inline-flex items-center gap-0.5 font-medium text-amber-600 dark:text-amber-400">
+                <div className="mt-1 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <span className="inline-flex items-center gap-0.5 font-medium text-amber-700 dark:text-amber-400">
                     <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                     <span>{novel.rating?.toFixed(1) ?? "9.0"}</span>
                   </span>
@@ -210,20 +210,19 @@ export function TopFollowedLeaderboard({
                     className="inline-flex items-center gap-0.5"
                     title={`${followerCount.toLocaleString()} ${isEn ? "followers" : "คนติดตาม"}`}
                   >
-                    <Users className="w-3 h-3 text-slate-400" />
+                    <Users className="w-3 h-3 text-slate-500 dark:text-slate-400" />
                     <span>{formatFollowerCount(followerCount, isEn)}</span>
                   </span>
                 </div>
-              </div>
 
-              {/* Bookmark 1-Click Button */}
+              {/* Bookmark 1-Click Button (under the info so the title keeps its width) */}
               <button
                 type="button"
                 onClick={() => handleToggleBookmark(novel)}
-                className={`px-2.5 h-7.5 flex-shrink-0 rounded-full text-[11px] font-medium transition-all flex items-center justify-center gap-1 border ${
+                className={`hit-area-y mt-1.5 px-2.5 h-8 w-fit rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1 border ${
                   isSaved
-                    ? "bg-orange-50 text-orange-600 border-orange-300 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800"
-                    : "bg-white text-slate-700 border-slate-200 hover:border-orange-400 hover:text-orange-500 hover:bg-orange-50/40 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:border-orange-500"
+                    ? "bg-orange-50 text-orange-700 border-orange-300 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800"
+                    : "bg-white text-slate-700 border-slate-200 hover:border-orange-400 hover:text-orange-700 hover:bg-orange-50/40 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:border-orange-500"
                 }`}
                 title={
                   isSaved
@@ -238,16 +237,17 @@ export function TopFollowedLeaderboard({
               >
                 {isSaved ? (
                   <>
-                    <Check className="w-3 h-3 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+                    <Check className="w-3 h-3 text-orange-700 dark:text-orange-400 flex-shrink-0" />
                     <span>{isEn ? "Saved" : "คั่นแล้ว"}</span>
                   </>
                 ) : (
                   <>
-                    <BookmarkPlus className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                    <BookmarkPlus className="w-3 h-3 text-slate-500 flex-shrink-0 dark:text-slate-400" />
                     <span>{isEn ? "+ Bookmark" : "+ คั่นเรื่องนี้"}</span>
                   </>
                 )}
               </button>
+              </div>
             </div>
           );
         })}

@@ -191,7 +191,7 @@ export function BookmarkList({
           className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400"
         >
           {isLoading ? (
-            <span className="text-gray-400">กำลังโหลดรายการ</span>
+            <span className="text-gray-500 dark:text-slate-400">กำลังโหลดรายการ</span>
           ) : isFiltered ? (
             <span>{t.bookmarks.filteredCount(filteredBookmarks.length, totalCount)}</span>
           ) : (
@@ -207,7 +207,7 @@ export function BookmarkList({
               <button
                 type="button"
                 onClick={onToggleEditMode}
-                className="inline-flex items-center px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
+                className="hit-area-y inline-flex items-center px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
               >
                 {t.editMode.cancel}
               </button>
@@ -217,7 +217,7 @@ export function BookmarkList({
                 type="button"
                 disabled={selectedIds.size === 0}
                 onClick={() => setIsBulkDeleteModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-red-600 hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-950/40 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                className="hit-area-y inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-red-600 hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-950/40 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span role="status" aria-live="polite">
@@ -232,7 +232,7 @@ export function BookmarkList({
                 type="button"
                 disabled={isLoading || totalCount === 0}
                 onClick={onToggleEditMode}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all active:scale-95 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 border border-gray-300 dark:border-gray-700 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
+                className="hit-area-y inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all active:scale-95 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
                 aria-pressed={isEditMode}
               >
                 <Edit3 className="w-3.5 h-3.5" />
@@ -243,7 +243,7 @@ export function BookmarkList({
               <button
                 type="button"
                 onClick={onOpenAddModal}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover shadow-sm active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dekd-orange"
+                className="hit-area-y inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover shadow-sm active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dekd-orange"
               >
                 <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                 <span>{t.bookmarks.addBookmark}</span>
@@ -267,13 +267,13 @@ export function BookmarkList({
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-amber-200 dark:from-gray-800 dark:to-gray-750 text-dekd-orange font-bold text-xs">
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-amber-200 dark:from-gray-800 dark:to-gray-700 text-dekd-orange dark:text-orange-400 font-bold text-xs">
                   {latestReadBookmark.title.slice(0, 1)}
                 </div>
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-dekd-orange mb-0.5">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-dekd-orange dark:text-orange-400 mb-0.5">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>{locale === "th" ? "อ่านค้างไว้ล่าสุด" : "Continue Reading"}</span>
               </div>
@@ -289,7 +289,7 @@ export function BookmarkList({
           </div>
           <Link
             href={`/read/${latestReadBookmark.novelId || latestReadBookmark.id}/${latestReadBookmark.currentChapter}`}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-dekd-orange hover:bg-dekd-orange-hover shadow-xs active:scale-95 transition-all shrink-0"
+            className="hit-area-y inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-dekd-orange hover:bg-dekd-orange-hover shadow-xs active:scale-95 transition-all shrink-0"
           >
             <span>{locale === "th" ? "อ่านต่อทันที" : "Resume Now"}</span>
           </Link>
@@ -303,7 +303,7 @@ export function BookmarkList({
           <button
             type="button"
             onClick={() => handleCategoryChange("ทั้งหมด")}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange ${
+            className={`hit-area-y px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange ${
               selectedCategory === "ทั้งหมด"
                 ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xs"
                 : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -316,7 +316,7 @@ export function BookmarkList({
               key={cat}
               type="button"
               onClick={() => handleCategoryChange(cat)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange ${
+              className={`hit-area-y px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange ${
                 selectedCategory === cat
                   ? "bg-dekd-orange text-white shadow-xs shadow-orange-500/20"
                   : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -329,15 +329,15 @@ export function BookmarkList({
 
         {/* Status Chips */}
         <div className="flex items-center gap-2 text-xs">
-          <span className="text-gray-400 font-medium hidden sm:inline">สถานะ:</span>
+          <span className="text-gray-500 font-medium hidden sm:inline dark:text-slate-400">สถานะ:</span>
           {(["all", "reading", "completed", "on_hold"] as const).map((status) => (
             <button
               key={status}
               type="button"
               onClick={() => handleStatusChange(status)}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange ${
+              className={`hit-area-y px-2.5 py-1 rounded-md text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange ${
                 selectedStatus === status
-                  ? "text-dekd-orange bg-orange-50 dark:bg-orange-950/40 font-semibold"
+                  ? "text-dekd-orange dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 font-semibold"
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               }`}
             >
@@ -353,7 +353,7 @@ export function BookmarkList({
       ) : filteredBookmarks.length === 0 ? (
         /* Empty State */
         <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl bg-white dark:bg-gray-900 border border-dashed border-gray-200 dark:border-gray-800 my-4">
-          <div className="w-14 h-14 rounded-full bg-orange-50 dark:bg-orange-950/40 text-dekd-orange flex items-center justify-center mb-3.5">
+          <div className="w-14 h-14 rounded-full bg-orange-50 dark:bg-orange-950/40 text-dekd-orange dark:text-orange-400 flex items-center justify-center mb-3.5">
             <BookOpen className="w-7 h-7" />
           </div>
           {isFiltered ? (
