@@ -5,7 +5,7 @@ import { Calendar } from "lucide-react";
 import { useI18n } from "@/context/I18nContext";
 
 export interface ReleaseSchedule {
-  daysOfWeek?: number[]; // 0 = Sun, 1 = Mon, ..., 6 = Sat
+  daysOfWeek?: number[]; // 0 = Sun, 1 = Mon, to 6 = Sat
   days?: (1 | 2 | 3 | 4 | 5 | 6 | 7)[]; // 1 = Mon, 7 = Sun or similar
   timeString?: string;
   time?: string;
@@ -58,7 +58,7 @@ export function ScheduleBadge({
     <span
       data-testid="schedule-badge"
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-medium transition-colors select-none bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60 ${
-        compact ? "text-[11px]" : "text-xs"
+        compact ? "text-xs" : "text-xs"
       } ${className}`}
       title={fullLabel}
       aria-label={`กำหนดการอัปเดต: ${fullLabel}`}

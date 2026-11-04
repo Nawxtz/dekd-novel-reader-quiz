@@ -1,13 +1,23 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import { render, screen, fireEvent, within, act } from "@testing-library/react";
 import React from "react";
 import { LanguageBadge } from "../src/components/LanguageBadge";
 import { StatusBadge } from "../src/components/StatusBadge";
 import { ScheduleBadge } from "../src/components/ScheduleBadge";
 import { TopFollowedLeaderboard } from "../src/components/TopFollowedLeaderboard";
 import { LatestUpdatesFeed } from "../src/components/LatestUpdatesFeed";
+import { BookmarkList } from "../src/components/BookmarkList";
 import { I18nProvider } from "../src/context/I18nContext";
-import { BookmarkProvider } from "../src/context/BookmarkContext";
+import {
+  BookmarkProvider,
+  readingProgressStore,
+  readerPrefsStore,
+  chapterCommentsStore,
+  READING_PROGRESS_STORAGE_KEY,
+  READER_PREFS_STORAGE_KEY,
+  CHAPTER_COMMENTS_STORAGE_KEY,
+  useBookmarkContext,
+} from "../src/context/BookmarkContext";
 import { CATALOG_NOVELS } from "../src/data/mockNovels";
 import { bookmarksStore } from "../src/hooks/useBookmarks";
 import ReaderPage from "../src/app/read/[novelId]/[chapter]/page";
@@ -266,6 +276,113 @@ describe("Sprint 3 & 4: Section 3 Badges, Leaderboard, and Feed", () => {
       expect(
         within(hero).getByText("คุณกำลังอ่านตอนที่คั่นไว้ (ตอนที่ 18)")
       ).toBeInTheDocument();
+    });
+
+    it("safely rejects invalid novelId with unsafe characters and renders fallback message", () => {
+      render(
+        <I18nProvider>
+          <BookmarkProvider>
+            <ReaderPage params={{ novelId: "novel<script>bad", chapter: "1" }} />
+          </BookmarkProvider>
+        </I18nProvider>
+      );
+
+      expect(screen.getByText("รหัสนิยายไม่ถูกต้อง")).toBeInTheDocument();
+      expect(screen.getByText("รหัสนิยายที่ระบุมีอักขระที่ไม่ปลอดภัย")).toBeInTheDocument();
+      expect(screen.getByText("กลับสู่หน้าหลัก")).toBeInTheDocument();
+    });
+
+    it("renders quick resume link with correct /read/[novelId]/[chapter] path in BookmarkList", () => {
+      const mockBookmarks = [
+        {
+          id: "b-001",
+          novelId: "dekd-novel-99",
+          title: "ยอดจอมเวท",
+          author: "นักเขียน",
+          category: "แฟนตาซี" as const,
+          currentChapter: 7,
+          totalChapters: 50,
+          currentChapterTitle: "บทที่ 7",
+          status: "reading" as const,
+          note: "",
+          coverUrl: "",
+          lastReadAt: "2026-01-02T00:00:00.000Z",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-02T00:00:00.000Z",
+        },
+      ];
+
+      render(
+        <I18nProvider>
+          <BookmarkList
+            bookmarks={mockBookmarks}
+            isLoading={false}
+            searchQuery=""
+            isEditMode={false}
+            onToggleEditMode={vi.fn()}
+            onOpenAddModal={vi.fn()}
+            onBulkDelete={vi.fn()}
+          />
+        </I18nProvider>
+      );
+
+      const resumeLink = screen.getByRole("link", { name: "อ่านต่อทันที" });
+      expect(resumeLink).toHaveAttribute("href", "/read/dekd-novel-99/7");
+    });
+
+    it("toggleBookmarkFromCatalog preserves activeChapter parameter instead of resetting to chapter 1", () => {
+      let contextRef: any = null;
+      function TestConsumer() {
+        contextRef = useBookmarkContext();
+        return null;
+      }
+
+      render(
+        <I18nProvider>
+          <BookmarkProvider>
+            <TestConsumer />
+          </BookmarkProvider>
+        </I18nProvider>
+      );
+
+      const catalogNovel = CATALOG_NOVELS[0];
+      act(() => {
+        contextRef.toggleBookmarkFromCatalog(catalogNovel, 15);
+      });
+
+      const bookmark = bookmarksStore.getSnapshot()?.find(
+        (b) => b.novelId === catalogNovel.id
+      );
+      expect(bookmark).toBeDefined();
+      expect(bookmark?.currentChapter).toBe(15);
+      expect(bookmark?.currentChapterTitle).toBe("ตอนที่ 15");
+    });
+
+    it("safely ignores prototype pollution payloads when deserializing storage stores", () => {
+      localStorage.setItem(
+        READING_PROGRESS_STORAGE_KEY,
+        '{"__proto__": {"polluted": true}, "test-novel": {"novelId": "test", "chapter": 1, "blockId": "", "lastReadAt": ""}}'
+      );
+      (readingProgressStore as any).initialized = false;
+      readingProgressStore.init();
+      expect((Object.prototype as any).polluted).toBeUndefined();
+      expect(readingProgressStore.getSnapshot()).toEqual({});
+
+      localStorage.setItem(
+        READER_PREFS_STORAGE_KEY,
+        '{"__proto__": {"polluted": true}, "theme": "night"}'
+      );
+      (readerPrefsStore as any).initialized = false;
+      readerPrefsStore.init();
+      expect((Object.prototype as any).polluted).toBeUndefined();
+
+      localStorage.setItem(
+        CHAPTER_COMMENTS_STORAGE_KEY,
+        '{"__proto__": {"polluted": true}}'
+      );
+      (chapterCommentsStore as any).initialized = false;
+      chapterCommentsStore.init();
+      expect((Object.prototype as any).polluted).toBeUndefined();
     });
   });
 });

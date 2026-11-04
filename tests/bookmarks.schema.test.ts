@@ -4,6 +4,7 @@ import {
   StorageEnvelopeSchema,
   BookmarkFormSchema,
 } from "../src/types/novel";
+import { stripHtmlTags } from "../src/lib/sanitize";
 import { INITIAL_BOOKMARKS } from "../src/data/mockNovels";
 
 describe("BookmarkItemSchema", () => {
@@ -109,6 +110,16 @@ describe("StorageEnvelopeSchema", () => {
     };
     const res = StorageEnvelopeSchema.safeParse(payload);
     expect(res.success).toBe(false);
+  });
+});
+
+describe("Security Sanitization", () => {
+  it("recursively eliminates nested tag structures to prevent filter bypass", () => {
+    const nested = "<scr<script>ipt>alert('nested')</script>";
+    expect(stripHtmlTags(nested)).toBe("alert('nested')");
+
+    const multiNested = "<<<script>script>script>alert(1)<</script>/script>";
+    expect(stripHtmlTags(multiNested)).toBe("alert(1)");
   });
 });
 

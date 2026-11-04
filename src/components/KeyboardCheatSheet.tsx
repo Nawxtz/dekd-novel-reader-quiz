@@ -19,12 +19,14 @@ export function KeyboardCheatSheet({
 }: KeyboardCheatSheetProps) {
   const { t } = useI18n();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
     if (isOpen) {
+      triggerRef.current = document.activeElement as HTMLElement | null;
       if (!dialog.open) {
         dialog.showModal();
       }
@@ -32,8 +34,15 @@ export function KeyboardCheatSheet({
       if (dialog.open) {
         dialog.close();
       }
+      triggerRef.current?.focus();
     }
   }, [isOpen]);
+
+  const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    if (e.target === dialogRef.current) {
+      onClose();
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -49,14 +58,15 @@ export function KeyboardCheatSheet({
     <dialog
       ref={dialogRef}
       onClose={onClose}
+      onClick={handleDialogClick}
       aria-labelledby="shortcuts-modal-title"
-      className="m-auto p-0 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl max-w-md w-full focus:outline-none"
+      className="m-auto p-0 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl max-w-md w-full focus:outline-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
     >
-      <div className="p-6">
+      <div className="p-6" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-gray-100 dark:border-gray-800 mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-dekd-orange flex items-center justify-center">
+            <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-dekd-orange dark:text-orange-400 flex items-center justify-center">
               <Keyboard className="w-5 h-5" />
             </div>
             <div>
@@ -71,7 +81,7 @@ export function KeyboardCheatSheet({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-1.5 rounded-full text-gray-500 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange dark:text-slate-400"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -102,7 +112,7 @@ export function KeyboardCheatSheet({
         {/* WCAG 2.1.4 Toggle */}
         <div className="flex items-center justify-between p-3 rounded-xl bg-orange-50/50 dark:bg-orange-950/30 border border-orange-200/60 dark:border-orange-900/40 mb-5">
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-dekd-orange shrink-0" />
+            <Shield className="w-4 h-4 text-dekd-orange dark:text-orange-400 shrink-0" />
             <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
               {t.shortcuts.toggleLabel}
             </span>
@@ -110,11 +120,12 @@ export function KeyboardCheatSheet({
           <button
             type="button"
             onClick={onToggleShortcuts}
-            className={`w-9 h-5 rounded-full transition-colors relative flex items-center px-0.5 ${
+            className={`w-9 h-5 rounded-full transition-colors relative flex items-center px-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dekd-orange ${
               shortcutsEnabled ? "bg-dekd-orange" : "bg-gray-300 dark:bg-gray-700"
             }`}
             role="switch"
             aria-checked={shortcutsEnabled}
+            aria-label={t.shortcuts.toggleLabel}
           >
             <div
               className={`w-4 h-4 rounded-full bg-white shadow-xs transform transition-transform ${
@@ -129,7 +140,7 @@ export function KeyboardCheatSheet({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors"
+            className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dekd-orange"
           >
             {t.shortcuts.close}
           </button>

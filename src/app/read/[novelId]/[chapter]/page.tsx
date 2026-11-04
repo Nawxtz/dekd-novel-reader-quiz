@@ -11,6 +11,7 @@ import {
   BookOpen,
   Bookmark as BookmarkIcon,
   Check,
+  AlertCircle,
 } from "lucide-react";
 import { useBookmarkContext } from "@/context/BookmarkContext";
 import { useI18n } from "@/context/I18nContext";
@@ -31,6 +32,7 @@ interface ReaderPageProps {
 export default function ReaderPage({ params }: ReaderPageProps) {
   const router = useRouter();
   const { novelId, chapter: chapterParam } = params;
+  const isValidNovelId = Boolean(novelId && /^[a-zA-Z0-9_-]+$/.test(novelId));
   const currentChapterNum = Math.max(1, parseInt(chapterParam, 10) || 1);
 
   const {
@@ -44,6 +46,12 @@ export default function ReaderPage({ params }: ReaderPageProps) {
 
   const { locale } = useI18n();
   const isEn = locale === "en";
+
+  useEffect(() => {
+    if (!isValidNovelId) {
+      router.replace("/");
+    }
+  }, [isValidNovelId, router]);
 
   // Local state for reader settings with fallback to context
   const [theme, setTheme] = useState<ThemeMode>(readerPrefs?.theme || "day");
@@ -187,6 +195,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
 
   // Record reading progress in LocalStorage
   useEffect(() => {
+    if (!isValidNovelId) return;
     saveReadingProgress(
       {
         novelId,
@@ -196,7 +205,19 @@ export default function ReaderPage({ params }: ReaderPageProps) {
       },
       chapterData.titleTh
     );
-  }, [novelId, currentChapterNum, chapterData, saveReadingProgress]);
+  }, [isValidNovelId, novelId, currentChapterNum, chapterData, saveReadingProgress]);
+
+  // The reader theme owns the page: drive the `dark:` variants from it (night = dark),
+  // so a dark app theme cannot put dark-mode text on the day/sepia paper.
+  // The app theme class is restored when leaving the reader.
+  useEffect(() => {
+    const root = document.documentElement;
+    const appWasDark = root.classList.contains("dark");
+    root.classList.toggle("dark", theme === "night");
+    return () => {
+      root.classList.toggle("dark", appWasDark);
+    };
+  }, [theme]);
 
   // Handlers for reader settings
   const handleThemeChange = useCallback(
@@ -256,6 +277,29 @@ export default function ReaderPage({ params }: ReaderPageProps) {
 
   const currentFontSizePx = FONT_SIZE_STEPS[fontSizeIndex] ?? 20;
 
+  if (!isValidNovelId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            {isEn ? "Invalid Novel Identifier" : "รหัสนิยายไม่ถูกต้อง"}
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            {isEn
+              ? "The requested novel ID contains unsafe characters."
+              : "รหัสนิยายที่ระบุมีอักขระที่ไม่ปลอดภัย"}
+          </p>
+          <Link
+            href="/"
+            className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-dekd-orange hover:bg-dekd-orange-hover transition-colors"
+          >
+            {isEn ? "Back to Home" : "กลับสู่หน้าหลัก"}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       data-testid="novel-reader-page"
@@ -278,7 +322,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
         onContentLocaleChange={setContentLocale}
         hasBilingual={hasBilingual}
         isBookmarked={isSaved}
-        onToggleBookmark={() => toggleBookmarkFromCatalog(novel)}
+        onToggleBookmark={() => toggleBookmarkFromCatalog(novel, currentChapterNum)}
       />
 
       {/* Main Reader Wrapper */}
@@ -295,23 +339,23 @@ export default function ReaderPage({ params }: ReaderPageProps) {
           }`}
           aria-label="Novel summary and continue reading"
         >
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+          <div className="flex flex-row items-start gap-3 sm:gap-4">
             {/* Novel Cover Thumbnail */}
-            <div className="relative w-20 sm:w-24 aspect-[2/3] shrink-0 rounded-xl overflow-hidden shadow-xs border border-black/10">
+            <div className="relative w-14 sm:w-24 aspect-[2/3] shrink-0 rounded-xl overflow-hidden shadow-xs border border-black/10">
               <Image
                 src={novel.coverUrl}
                 alt={novel.titleTh}
                 fill
-                sizes="(max-width: 640px) 80px, 96px"
+                sizes="(max-width: 640px) 56px, 96px"
                 className="object-cover"
               />
             </div>
 
             {/* Novel Info & Reading CTA */}
-            <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch text-center sm:text-left">
+            <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch text-left">
               <div>
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1.5">
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-orange-100 dark:bg-orange-950/70 text-orange-600 dark:text-orange-400">
+                <div className="flex flex-wrap items-center justify-start gap-2 mb-1.5">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-400">
                     {novel.category}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -330,7 +374,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
               {/* Action Banner: Read at current episode that was read before */}
               <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-xs">
-                  <BookOpen className="w-4 h-4 text-dekd-orange shrink-0" />
+                  <BookOpen className="w-4 h-4 text-dekd-orange dark:text-orange-400 shrink-0" />
                   <span className="text-gray-600 dark:text-gray-300">
                     {bookmarkedNovel
                       ? (isEn
@@ -368,13 +412,13 @@ export default function ReaderPage({ params }: ReaderPageProps) {
 
                   <button
                     type="button"
-                    onClick={() => toggleBookmarkFromCatalog(novel)}
-                    className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-orange-400 hover:text-dekd-orange transition-all"
+                    onClick={() => toggleBookmarkFromCatalog(novel, currentChapterNum)}
+                    className="hit-area-y inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-orange-400 hover:text-dekd-orange transition-all"
                     title={isSaved ? (isEn ? "Remove from bookmarks" : "ยกเลิกคั่นนิยาย") : (isEn ? "Bookmark this novel" : "คั่นนิยายเรื่องนี้")}
                   >
                     <BookmarkIcon
                       className={`w-3.5 h-3.5 ${
-                        isSaved ? "text-dekd-orange fill-dekd-orange" : "text-gray-400"
+                        isSaved ? "text-dekd-orange dark:text-orange-400 fill-dekd-orange" : "text-gray-500"
                       }`}
                     />
                     <span>{isSaved ? (isEn ? "Bookmarked" : "คั่นแล้ว") : (isEn ? "Bookmark" : "คั่นนิยาย")}</span>
@@ -398,13 +442,13 @@ export default function ReaderPage({ params }: ReaderPageProps) {
           aria-label="Chapter quick navigation"
         >
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-            {/* Quick jump pills */}
-            <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Quick jump pills (mobile uses the bottom chapter nav and the search box instead) */}
+            <div className="hidden md:flex items-center gap-1.5 flex-wrap">
               <Link
                 href={`/read/${novelId}/1`}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                   currentChapterNum === 1
-                    ? "bg-orange-500 text-white border-orange-600 shadow-xs"
+                    ? "bg-orange-700 text-white border-orange-600 shadow-xs"
                     : theme === "night"
                     ? "bg-slate-800 border-slate-700 text-slate-300 hover:border-orange-500"
                     : theme === "sepia"
@@ -451,7 +495,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
                 href={`/read/${novelId}/${novel.totalChapters || 120}`}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                   currentChapterNum === (novel.totalChapters || 120)
-                    ? "bg-orange-500 text-white border-orange-600 shadow-xs"
+                    ? "bg-orange-700 text-white border-orange-600 shadow-xs"
                     : theme === "night"
                     ? "bg-slate-800 border-slate-700 text-slate-300 hover:border-orange-500"
                     : theme === "sepia"
@@ -464,12 +508,13 @@ export default function ReaderPage({ params }: ReaderPageProps) {
             </div>
 
             {/* Chapter search input matching user image */}
+            <div className="flex flex-col gap-1.5">
             <form
               onSubmit={handleSearchChapterSubmit}
               className="flex items-center gap-2"
             >
               <div className="relative flex-1 md:w-56">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 dark:text-slate-400" />
                 <input
                   type="text"
                   value={searchChapterInput}
@@ -482,7 +527,10 @@ export default function ReaderPage({ params }: ReaderPageProps) {
                       ? "Search chapter e.g. 25"
                       : "ค้นหาเลขตอน เช่น 25 หรือ 108"
                   }
-                  className={`w-full pl-8 pr-3 py-1.5 rounded-xl text-xs border focus:outline-none focus:ring-1 focus:ring-orange-500 ${
+                  aria-label={isEn ? "Chapter number" : "เลขตอน"}
+                  aria-invalid={searchError ? true : undefined}
+                  aria-describedby={searchError ? "chapter-search-error" : undefined}
+                  className={`w-full pl-8 pr-3 py-1.5 rounded-xl text-xs border focus:outline-none focus:ring-1 focus:ring-orange-500 aria-[invalid=true]:border-rose-600 ${
                     theme === "night"
                       ? "bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-500"
                       : theme === "sepia"
@@ -494,18 +542,26 @@ export default function ReaderPage({ params }: ReaderPageProps) {
 
               <button
                 type="submit"
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors flex-shrink-0 shadow-xs"
+                className="hit-area-y px-3 py-1.5 rounded-xl text-xs font-semibold bg-orange-700 hover:bg-orange-800 text-white transition-colors flex-shrink-0 shadow-xs"
               >
                 {isEn ? "Go" : "ไปที่ตอน"}
               </button>
             </form>
-          </div>
 
-          {searchError && (
-            <p className="text-[11px] text-rose-500 mt-2 font-medium">
-              {searchError}
-            </p>
-          )}
+            {searchError && (
+              <p
+                id="chapter-search-error"
+                role="alert"
+                className={`flex items-center gap-1 text-xs font-medium ${
+                  theme === "night" ? "text-rose-400" : "text-rose-700"
+                }`}
+              >
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                {searchError}
+              </p>
+            )}
+            </div>
+          </div>
         </section>
 
         {/* Thai Typography Content Container */}
@@ -582,7 +638,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
           <div className="mt-12 pt-8 border-t border-black/10 dark:border-white/10 text-center">
             <span className="text-xs tracking-wider opacity-60 uppercase font-semibold">
               {isEn
-                ? `— End of Chapter ${currentChapterNum} —`
+                ? `Chapter ${currentChapterNum} Complete`
                 : `จบบริบูรณ์ ตอนที่ ${currentChapterNum}`}
             </span>
           </div>
@@ -608,7 +664,7 @@ export default function ReaderPage({ params }: ReaderPageProps) {
           {currentChapterNum < (novel.totalChapters || 100) ? (
             <Link
               href={`/read/${novelId}/${currentChapterNum + 1}`}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors shadow-xs"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-orange-700 hover:bg-orange-800 text-white transition-colors shadow-xs"
             >
               <span>{isEn ? "Next Chapter" : "ตอนถัดไป"}</span>
               <ChevronRight className="w-4 h-4" />

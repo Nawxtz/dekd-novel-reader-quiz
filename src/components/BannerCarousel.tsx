@@ -11,7 +11,8 @@ interface BannerCarouselProps {
 }
 
 export function BannerCarousel({ banners }: BannerCarouselProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isEn = locale === "en";
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
@@ -157,7 +158,7 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
                 <div className="absolute inset-0 p-5 sm:p-8 md:p-10 flex flex-col justify-end text-white">
                   {/* Badge */}
                   <div className="flex items-center gap-1.5 mb-2">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[#f96519] text-white shadow-sm">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-dekd-orange text-white shadow-sm">
                       <Sparkles className="w-3 h-3 text-amber-200" />
                       {banner.tag}
                     </span>
@@ -175,11 +176,11 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
 
                   {/* Credit line */}
                   {banner.illustrator ? (
-                    <p className="text-[11px] sm:text-xs text-white/80 font-normal">
+                    <p className="text-xs text-white/80 font-normal">
                       story : {banner.author} | illust : {banner.illustrator}
                     </p>
                   ) : banner.author ? (
-                    <p className="text-[11px] sm:text-xs text-white/80 font-normal">
+                    <p className="text-xs text-white/80 font-normal">
                       story : {banner.author}
                     </p>
                   ) : null}
@@ -195,8 +196,8 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
             e.stopPropagation();
             handlePrev();
           }}
-          className="absolute left-2 sm:left-6 md:left-8 z-30 p-2 sm:p-2.5 rounded-full bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 text-gray-800 dark:text-white shadow-lg backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 active:scale-90 transition-all"
-          aria-label="Previous banner"
+          className="hit-area absolute left-2 sm:left-6 md:left-8 z-30 p-2 sm:p-2.5 rounded-full bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 text-gray-800 dark:text-white shadow-lg backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 active:scale-90 transition-all"
+          aria-label={isEn ? "Previous banner" : "แบนเนอร์ก่อนหน้า"}
         >
           <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
@@ -207,8 +208,8 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
             e.stopPropagation();
             handleNext();
           }}
-          className="absolute right-2 sm:right-6 md:right-8 z-30 p-2 sm:p-2.5 rounded-full bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 text-gray-800 dark:text-white shadow-lg backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 active:scale-90 transition-all"
-          aria-label="Next banner"
+          className="hit-area absolute right-2 sm:right-6 md:right-8 z-30 p-2 sm:p-2.5 rounded-full bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 text-gray-800 dark:text-white shadow-lg backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 active:scale-90 transition-all"
+          aria-label={isEn ? "Next banner" : "แบนเนอร์ถัดไป"}
         >
           <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
@@ -217,17 +218,17 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
       {/* Carousel Bottom Sub-bar: Dots & Play/Pause (WCAG 2.2.2) */}
       <div className="flex items-center justify-center gap-4 mt-3">
         {/* Indicator Dots */}
-        <div className="flex items-center gap-1.5" role="tablist" aria-label="Slide indicators">
+        <div className="flex items-center gap-3" role="tablist" aria-label={isEn ? "Slide indicators" : "ตัวเลือกสไลด์"}>
           {banners.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
-              className={`transition-all duration-300 rounded-full ${
+              className={`relative after:absolute after:content-[''] after:-inset-x-1.5 after:-inset-y-4 transition-all duration-300 rounded-full ${
                 currentIndex === i
                   ? "w-6 h-2 bg-dekd-orange"
                   : "w-2 h-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600"
               }`}
-              aria-label={`Go to slide ${i + 1}`}
+              aria-label={isEn ? `Go to slide ${i + 1}` : `ไปสไลด์ที่ ${i + 1}`}
               aria-selected={currentIndex === i}
               role="tab"
             />
@@ -237,7 +238,7 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
         {/* WCAG 2.2.2 Play / Pause Button */}
         <button
           onClick={() => setIsPlaying((prev) => !prev)}
-          className="p-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 transition-colors"
+          className="hit-area p-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 transition-colors"
           aria-label={isPlaying ? t.hero.pauseCarousel : t.hero.playCarousel}
           title={isPlaying ? t.hero.pauseCarousel : t.hero.playCarousel}
         >

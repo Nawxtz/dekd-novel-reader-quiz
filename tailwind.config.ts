@@ -11,8 +11,8 @@ const config: Config = {
     extend: {
       colors: {
         dekd: {
-          orange: "#f96519",
-          "orange-hover": "#e05510",
+          orange: "#c2410c",
+          "orange-hover": "#9a3412",
           "orange-light": "#fff5ed",
           "orange-subtle": "#ffe8d6",
           green: "#8bc321",

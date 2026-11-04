@@ -33,10 +33,19 @@ export function isValidHttpsUrl(urlString: string): boolean {
   }
 }
 
-// Strip HTML tags to prevent XSS in text fields
+// Strip HTML tags recursively to prevent XSS and nested tag bypasses
 export function stripHtmlTags(input: string): string {
   if (typeof input !== "string") return "";
-  return input.replace(/<[^>]*>?/gm, "").trim();
+  let current = input;
+  let previous = "";
+  let iterations = 0;
+  while (current !== previous && iterations < 20) {
+    previous = current;
+    current = current.replace(/<[^<>]*>/g, "");
+    iterations++;
+  }
+  current = current.replace(/<[^<>]*$/g, "");
+  return current.trim();
 }
 
 // Sanitize user text (normalizes unicode, removes control chars and HTML tags)

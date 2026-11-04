@@ -5,7 +5,7 @@ export const MOCK_BANNERS: Banner[] = [
   {
     id: "69983b1f-28e7-42b5-8a80-d8fe0ee19b8a",
     title: "ระบบเจ้าสำนักจักรวาล",
-    subtitle: "story: Redpanda | illust: bell.con",
+    subtitle: "เส้นทางสู่การเป็นเจ้าสำนักผู้ครองจักรวาล",
     tag: "นิยายแนะนำประจำสัปดาห์",
     author: "Redpanda",
     illustrator: "bell.con",
